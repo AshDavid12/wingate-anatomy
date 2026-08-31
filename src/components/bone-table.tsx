@@ -3,8 +3,9 @@
 import { useMemo, useState } from "react";
 import { musclesForBone, searchBones } from "@/data/lookups";
 import { EmptyState } from "@/components/muscle-table";
+import { AnatomyLightbox, AnatomyThumb } from "@/components/anatomy-image";
 import { cn } from "@/lib/utils";
-import type { Muscle } from "@/data/types";
+import type { Bone, Muscle } from "@/data/types";
 
 const SKELETON_LABEL: Record<string, string> = {
   axial: "שלד ציר",
@@ -14,6 +15,7 @@ const SKELETON_LABEL: Record<string, string> = {
 
 export function BoneTable({ query }: { query: string }) {
   const [openId, setOpenId] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<Bone | null>(null);
   const list = useMemo(() => searchBones(query), [query]);
 
   if (list.length === 0) {
@@ -44,11 +46,22 @@ export function BoneTable({ query }: { query: string }) {
               return (
                 <tr key={b.id} className="border-t border-[var(--line)] align-top even:bg-[var(--paper)]/50">
                   <td className="px-4 py-3">
-                    <p className="font-bold">{b.nameHe}</p>
-                    <p className="term text-xs text-[var(--ink-soft)]">{b.nameEn}</p>
-                    <p className="mt-1 text-[11px] text-[var(--ink-soft)]">
-                      {SKELETON_LABEL[b.skeleton]} · {b.type} ({b.typeEn})
-                    </p>
+                    <div className="flex items-start gap-3">
+                      <AnatomyThumb
+                        kind="bones"
+                        id={b.id}
+                        alt={b.nameHe}
+                        size="sm"
+                        onOpen={() => setLightbox(b)}
+                      />
+                      <div>
+                        <p className="font-bold">{b.nameHe}</p>
+                        <p className="term text-xs text-[var(--ink-soft)]">{b.nameEn}</p>
+                        <p className="mt-1 text-[11px] text-[var(--ink-soft)]">
+                          {SKELETON_LABEL[b.skeleton]} · {b.type} ({b.typeEn})
+                        </p>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <MuscleChips list={origins} empty="אין origin ברשימת השרירים" />
@@ -80,11 +93,19 @@ export function BoneTable({ query }: { query: string }) {
           return (
             <article
               key={b.id}
-              className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4 shadow-sm"
+              className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--card)] shadow-sm"
             >
+              <AnatomyThumb
+                kind="bones"
+                id={b.id}
+                alt={b.nameHe}
+                size="lg"
+                className="rounded-none border-0"
+                onOpen={() => setLightbox(b)}
+              />
               <button
                 type="button"
-                className="flex w-full items-start justify-between gap-3 text-right"
+                className="flex w-full items-start justify-between gap-3 p-4 text-right"
                 onClick={() => setOpenId(open ? null : b.id)}
               >
                 <div>
@@ -96,7 +117,7 @@ export function BoneTable({ query }: { query: string }) {
                 </div>
                 <span className="text-xs text-[var(--accent)]">{open ? "סגור" : "פתח"}</span>
               </button>
-              <div className={cn("mt-3 space-y-3", !open && "hidden")}>
+              <div className={cn("space-y-3 px-4 pb-4", !open && "hidden")}>
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
                     Origin
@@ -127,6 +148,26 @@ export function BoneTable({ query }: { query: string }) {
           );
         })}
       </div>
+
+      {lightbox && (
+        <AnatomyLightbox
+          open
+          onClose={() => setLightbox(null)}
+          kind="bones"
+          id={lightbox.id}
+          title={lightbox.nameHe}
+          subtitle={lightbox.nameEn}
+        >
+          <ul className="list-disc pr-4 text-sm">
+            {lightbox.movements.map((mv) => (
+              <li key={mv}>{mv}</li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs text-[var(--ink-soft)]">
+            Landmarks: {lightbox.landmarks.join(" · ")}
+          </p>
+        </AnatomyLightbox>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Bone, Dumbbell, GraduationCap, Layers, Search, Sparkles } from "lucide-react";
+import { Bone, Dumbbell, GraduationCap, Images, Layers, Search, Sparkles } from "lucide-react";
 import { muscles } from "@/data/muscles";
 import { REGIONS, type RegionId } from "@/data/regions";
 import { searchMuscles } from "@/data/lookups";
@@ -11,14 +11,16 @@ import { JointsView } from "@/components/joints-view";
 import { Flashcards } from "@/components/flashcards";
 import { Quiz } from "@/components/quiz";
 import { Glossary } from "@/components/glossary";
+import { Atlas } from "@/components/atlas";
 import { cn } from "@/lib/utils";
 
-type Tab = "muscles" | "bones" | "joints" | "cards" | "quiz" | "terms";
+type Tab = "muscles" | "bones" | "joints" | "atlas" | "cards" | "quiz" | "terms";
 
 const TABS: { id: Tab; label: string; icon: typeof Dumbbell }[] = [
   { id: "muscles", label: "שרירים", icon: Dumbbell },
   { id: "bones", label: "עצמות", icon: Bone },
   { id: "joints", label: "מפרקים", icon: Layers },
+  { id: "atlas", label: "אטלס", icon: Images },
   { id: "cards", label: "כרטיסיות", icon: Sparkles },
   { id: "quiz", label: "חידון", icon: GraduationCap },
   { id: "terms", label: "מושגים", icon: Search },
@@ -102,7 +104,7 @@ export function StudyApp() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="חיפוש שריר, עצם, origin, insertion או תנועה…"
+                placeholder="חיפוש שריר, עצם, origin, insertion, תנועה או איור…"
                 className="w-full rounded-xl border border-[var(--line)] bg-[var(--card)] py-2.5 pr-10 pl-3 text-sm outline-none ring-[var(--accent-2)] focus:ring-2"
               />
             </div>
@@ -175,13 +177,23 @@ export function StudyApp() {
           </div>
         )}
 
-        {tab === "muscles" && <MuscleTable muscles={filtered} hidden={hidden} />}
+        {tab === "muscles" && (
+          <MuscleTable
+            muscles={filtered}
+            hidden={hidden}
+            regionBannerId={region === "all" ? undefined : region}
+          />
+        )}
         {tab === "bones" && <BoneTable query={query} />}
         {tab === "joints" && <JointsView />}
+        {tab === "atlas" && <Atlas query={query} />}
         {tab === "cards" && <Flashcards muscles={filtered} />}
         {tab === "quiz" && <Quiz />}
         {tab === "terms" && <Glossary />}
       </main>
+      <footer className="border-t border-[var(--line)] px-4 py-4 text-center text-[11px] text-[var(--ink-soft)]">
+        האיורים מתוך ויקיפדיה וויקישיתוף (Gray&apos;s Anatomy, BodyParts3D ועוד) — לשימוש לימודי.
+      </footer>
     </div>
   );
 }

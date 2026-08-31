@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { muscles } from "@/data/muscles";
+import { anatomyImage } from "@/data/anatomy-images";
+import { AnatomyThumb } from "@/components/anatomy-image";
 import { cn } from "@/lib/utils";
 
-type Kind = "origin" | "insertion" | "action" | "name";
+type Kind = "origin" | "insertion" | "action" | "name" | "picture";
 
 type Question = {
   muscleId: string;
@@ -24,22 +26,38 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function pickKind(): Kind {
-  const kinds: Kind[] = ["origin", "insertion", "action", "name"];
+  const kinds: Kind[] = ["origin", "insertion", "action", "name", "picture"];
   return kinds[Math.floor(Math.random() * kinds.length)];
 }
 
 function buildQuestion(pool = muscles.filter((m) => m.core)): Question {
-  const muscle = pool[Math.floor(Math.random() * pool.length)];
-  const kind = pickKind();
+  let kind = pickKind();
+  const pictured = pool.filter((m) => anatomyImage("muscles", m.id));
+  if (kind === "picture" && pictured.length < 4) kind = "name";
+
+  const source = kind === "picture" ? pictured : pool;
+  const muscle = source[Math.floor(Math.random() * source.length)] ?? pool[0];
+  if (!muscle) {
+    return {
+      muscleId: "trapezius",
+      kind: "name",
+      prompt: "אין שאלות",
+      answer: "",
+      options: [],
+    };
+  }
   const others = shuffle(pool.filter((m) => m.id !== muscle.id)).slice(0, 3);
 
-  if (kind === "name") {
+  if (kind === "name" || kind === "picture") {
     const answer = muscle.nameHe;
     const options = shuffle([answer, ...others.map((m) => m.nameHe)]);
     return {
       muscleId: muscle.id,
       kind,
-      prompt: `איזה שריר? Origin: ${muscle.originHe}`,
+      prompt:
+        kind === "picture"
+          ? "איזה שריר מופיע באיור?"
+          : `איזה שריר? Origin: ${muscle.originHe}`,
       answer,
       options,
     };
@@ -114,6 +132,18 @@ export function Quiz() {
           {q.kind}
         </p>
         <h2 className="mt-2 text-lg font-bold leading-snug md:text-xl">{q.prompt}</h2>
+        {q.kind === "picture" && (
+          <div className="mt-4 overflow-hidden rounded-xl border border-[var(--line)] bg-white">
+            <AnatomyThumb
+              kind="muscles"
+              id={q.muscleId}
+              alt="איור שריר"
+              size="hero"
+              className="mx-auto rounded-none border-0"
+              interactive={false}
+            />
+          </div>
+        )}
         <div className="mt-5 grid gap-2">
           {q.options.map((opt) => {
             const isPick = picked === opt;

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Muscle } from "@/data/types";
 import { EmptyState } from "@/components/muscle-table";
+import { AnatomyThumb } from "@/components/anatomy-image";
 import { cn } from "@/lib/utils";
 
 export function Flashcards({ muscles }: { muscles: Muscle[] }) {
@@ -16,6 +17,9 @@ export function Flashcards({ muscles }: { muscles: Muscle[] }) {
 
   const i = index % muscles.length;
   const m = muscles[i];
+  if (!m) {
+    return <EmptyState title="אין כרטיסיות" body="שנו את הסינון כדי לראות שרירים." />;
+  }
   const progress = known.size;
 
   function next(delta: number) {
@@ -44,15 +48,34 @@ export function Flashcards({ muscles }: { muscles: Muscle[] }) {
         {!flipped ? (
           <div className="flex h-full min-h-[280px] flex-col items-center justify-center text-center">
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">שריר</p>
+            <AnatomyThumb
+              kind="muscles"
+              id={m.id}
+              alt={m.nameHe}
+              size="md"
+              className="mx-auto mt-4"
+              interactive={false}
+            />
             <h2 className="mt-3 text-3xl font-bold">{m.nameHe}</h2>
             <p className="term mt-2 text-lg opacity-70">{m.nameEn}</p>
-            <p className="mt-8 text-sm opacity-60">לחצו לחשיפת Origin · Insertion · Action</p>
+            <p className="mt-6 text-sm opacity-60">לחצו לחשיפת Origin · Insertion · Action</p>
           </div>
         ) : (
           <div className="space-y-4 text-sm leading-relaxed">
-            <h2 className="text-xl font-bold">
-              {m.nameHe} <span className="term text-base font-normal opacity-70">· {m.nameEn}</span>
-            </h2>
+            <div className="flex items-start gap-3">
+              <AnatomyThumb
+                kind="muscles"
+                id={m.id}
+                alt={m.nameHe}
+                size="sm"
+                className="border-[var(--ink-soft)]/30"
+                interactive={false}
+              />
+              <h2 className="text-xl font-bold">
+                {m.nameHe}{" "}
+                <span className="term text-base font-normal opacity-70">· {m.nameEn}</span>
+              </h2>
+            </div>
             <Block label="Origin" he={m.originHe} en={m.originEn} />
             <Block label="Insertion" he={m.insertionHe} en={m.insertionEn} />
             <Block label="Action" he={m.actionHe} en={m.actionEn} />

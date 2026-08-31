@@ -1,5 +1,10 @@
+"use client";
+
+import { useState } from "react";
 import type { Muscle } from "@/data/types";
 import { REGIONS, REGION_COLORS } from "@/data/regions";
+import { AnatomyLightbox, AnatomyThumb } from "@/components/anatomy-image";
+import { anatomyImage } from "@/data/anatomy-images";
 import { cn } from "@/lib/utils";
 
 type Hidden = { o: boolean; i: boolean; a: boolean };
@@ -7,10 +12,15 @@ type Hidden = { o: boolean; i: boolean; a: boolean };
 export function MuscleTable({
   muscles,
   hidden,
+  regionBannerId,
 }: {
   muscles: Muscle[];
   hidden: Hidden;
+  regionBannerId?: string;
 }) {
+  const [open, setOpen] = useState<Muscle | null>(null);
+  const [regionOpen, setRegionOpen] = useState(false);
+
   if (muscles.length === 0) {
     return (
       <EmptyState title="אין שרירים תואמים" body="נסו מילת חיפוש אחרת או אפסו את הסינון." />
@@ -19,6 +29,19 @@ export function MuscleTable({
 
   return (
     <>
+      {regionBannerId && anatomyImage("regions", regionBannerId) && (
+        <div className="mb-4 overflow-hidden rounded-2xl border border-[var(--line)] bg-white">
+          <AnatomyThumb
+            kind="regions"
+            id={regionBannerId}
+            alt="איור אזור"
+            size="hero"
+            className="rounded-none border-0"
+            onOpen={() => setRegionOpen(true)}
+          />
+        </div>
+      )}
+
       <div className="hidden overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--card)] shadow-sm md:block">
         <table className="w-full text-sm">
           <thead className="bg-[var(--paper-2)] text-right text-xs uppercase tracking-wide text-[var(--ink-soft)]">
@@ -37,9 +60,22 @@ export function MuscleTable({
           </thead>
           <tbody>
             {muscles.map((m) => (
-              <tr key={m.id} className="border-t border-[var(--line)] align-top even:bg-[var(--paper)]/50">
+              <tr
+                key={m.id}
+                className="cursor-pointer border-t border-[var(--line)] align-top even:bg-[var(--paper)]/50 hover:bg-[var(--paper-2)]/80"
+                onClick={() => setOpen(m)}
+              >
                 <td className="px-4 py-3">
-                  <MuscleName m={m} />
+                  <div className="flex items-start gap-3">
+                    <AnatomyThumb
+                      kind="muscles"
+                      id={m.id}
+                      alt={m.nameHe}
+                      size="sm"
+                      onOpen={() => setOpen(m)}
+                    />
+                    <MuscleName m={m} />
+                  </div>
                 </td>
                 <td className={cn("px-4 py-3", hidden.o && "hide-study")}>
                   <p>{m.originHe}</p>
@@ -66,19 +102,74 @@ export function MuscleTable({
         {muscles.map((m) => (
           <article
             key={m.id}
-            className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4 shadow-sm"
+            className="overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--card)] shadow-sm"
           >
-            <MuscleName m={m} />
-            <Field label="Origin · התחלה" hidden={hidden.o} he={m.originHe} en={m.originEn} />
-            <Field label="Insertion · סיום" hidden={hidden.i} he={m.insertionHe} en={m.insertionEn} />
-            <Field label="Action · תנועה" hidden={hidden.a} he={m.actionHe} en={m.actionEn} />
-            {m.innervation && (
-              <p className="mt-2 text-xs text-[var(--ink-soft)]">עצבוב: {m.innervation}</p>
-            )}
-            {m.notes && <p className="mt-2 text-xs text-[var(--accent)]">{m.notes}</p>}
+            <AnatomyThumb
+              kind="muscles"
+              id={m.id}
+              alt={m.nameHe}
+              size="lg"
+              className="rounded-none border-0"
+              onOpen={() => setOpen(m)}
+            />
+            <button type="button" className="w-full p-4 text-right" onClick={() => setOpen(m)}>
+              <MuscleName m={m} />
+              <Field label="Origin · התחלה" hidden={hidden.o} he={m.originHe} en={m.originEn} />
+              <Field label="Insertion · סיום" hidden={hidden.i} he={m.insertionHe} en={m.insertionEn} />
+              <Field label="Action · תנועה" hidden={hidden.a} he={m.actionHe} en={m.actionEn} />
+              {m.innervation && (
+                <p className="mt-2 text-xs text-[var(--ink-soft)]">עצבוב: {m.innervation}</p>
+              )}
+              {m.notes && <p className="mt-2 text-xs text-[var(--accent)]">{m.notes}</p>}
+            </button>
           </article>
         ))}
       </div>
+
+      {regionOpen && regionBannerId && (
+        <AnatomyLightbox
+          open
+          onClose={() => setRegionOpen(false)}
+          kind="regions"
+          id={regionBannerId}
+          title={REGIONS.find((r) => r.id === regionBannerId)?.he ?? "אזור"}
+          subtitle={REGIONS.find((r) => r.id === regionBannerId)?.en}
+        />
+      )}
+      {open && (
+        <AnatomyLightbox
+          open
+          onClose={() => setOpen(null)}
+          kind="muscles"
+          id={open.id}
+          title={open.nameHe}
+          subtitle={open.nameEn}
+        >
+          <div className="grid gap-3 text-sm md:grid-cols-3">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
+                Origin
+              </p>
+              <p>{open.originHe}</p>
+              <p className="term mt-1 text-xs text-[var(--ink-soft)]">{open.originEn}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
+                Insertion
+              </p>
+              <p>{open.insertionHe}</p>
+              <p className="term mt-1 text-xs text-[var(--ink-soft)]">{open.insertionEn}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
+                Action
+              </p>
+              <p>{open.actionHe}</p>
+              <p className="term mt-1 text-xs text-[var(--ink-soft)]">{open.actionEn}</p>
+            </div>
+          </div>
+        </AnatomyLightbox>
+      )}
     </>
   );
 }
