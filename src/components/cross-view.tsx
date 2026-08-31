@@ -9,6 +9,7 @@ import {
   actionsAtJoint,
   familyOf,
   groupByJoint,
+  muscleActionsAtJoint,
   musclesByAction,
   musclesByJoint,
   musclesByPlane,
@@ -84,12 +85,24 @@ export function CrossView() {
 
       {mode === "joint" && (
         <>
-          <ChipRow
-            items={JOINT_TAGS.map((j) => ({ id: j.id, label: j.he }))}
-            value={joint}
-            onChange={(id) => setJoint(id as JointTag)}
-          />
-          <JointPanel joint={joint} />
+          <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4 md:grid-cols-7">
+            {JOINT_TAGS.map((j) => (
+              <button
+                key={j.id}
+                type="button"
+                onClick={() => setJoint(j.id)}
+                className={cn(
+                  "rounded-xl border px-2 py-2 text-sm font-medium",
+                  joint === j.id
+                    ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
+                    : "border-[var(--line)] bg-[var(--card)]",
+                )}
+              >
+                {j.he}
+              </button>
+            ))}
+          </div>
+          <JointPanel key={joint} joint={joint} />
         </>
       )}
 
@@ -237,13 +250,19 @@ function JointPanel({ joint }: { joint: JointTag }) {
   const byAction = acts.map((a) => ({
     action: a,
     meta: actionById(a),
-    muscles: list.filter((m) => MUSCLE_TAGS[m.id]?.actions.includes(a)),
+    muscles: list.filter((m) => muscleActionsAtJoint(m.id, joint).includes(a)),
   }));
   return (
     <div className="space-y-3">
       <div className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--accent)]">
+          מפרק נבחר
+        </p>
         <h3 className="text-lg font-bold">{meta?.he}</h3>
         <p className="term text-sm text-[var(--ink-soft)]">{meta?.en}</p>
+        <p className="mt-1 text-sm">
+          {list.length} שרירים שפועלים על מפרק זה
+        </p>
         <div className="mt-2 flex flex-wrap gap-1">
           {byAction.map((row) => (
             <span key={row.action} className="inline-flex items-center gap-1">
@@ -253,6 +272,11 @@ function JointPanel({ joint }: { joint: JointTag }) {
           ))}
         </div>
       </div>
+      {list.length === 0 && (
+        <p className="rounded-xl border border-dashed border-[var(--line)] p-4 text-sm text-[var(--ink-soft)]">
+          אין שרירים מתויגים למפרק זה.
+        </p>
+      )}
       {byAction.map((row) => (
         <div key={row.action}>
           <div className="mb-2 flex items-center gap-2">
@@ -260,6 +284,7 @@ function JointPanel({ joint }: { joint: JointTag }) {
               {row.meta?.he} <span className="term text-sm font-normal">{row.meta?.en}</span>
             </h4>
             <PlaneBadge plane={row.meta?.plane ?? null} />
+            <span className="text-xs text-[var(--ink-soft)]">{row.muscles.length}</span>
           </div>
           <div className="grid gap-2 md:grid-cols-2">
             {row.muscles.map((m) => (

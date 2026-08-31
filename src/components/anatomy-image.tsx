@@ -137,7 +137,10 @@ export function AnatomyLightbox({
             <img
               src={meta.src}
               alt={title}
-              className="mx-auto max-h-[58vh] w-auto max-w-full object-contain"
+              className={cn(
+                "mx-auto w-auto max-w-full object-contain",
+                children ? "max-h-[38vh]" : "max-h-[58vh]",
+              )}
             />
             <p className="mt-2 text-center text-[11px] text-[var(--ink-soft)]">
               איור: {meta.wikiTitle} · ויקיפדיה / ויקישיתוף

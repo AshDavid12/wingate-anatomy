@@ -150,7 +150,8 @@ export function MuscleTable({
           title={open.nameHe}
           subtitle={open.nameEn}
         >
-          <div className="grid gap-3 text-sm md:grid-cols-3">
+          <RelatedMuscles muscleId={open.id} />
+          <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
                 Origin
@@ -173,7 +174,6 @@ export function MuscleTable({
               <p className="term mt-1 text-xs text-[var(--ink-soft)]">{open.actionEn}</p>
             </div>
           </div>
-          <RelatedMuscles muscleId={open.id} />
         </AnatomyLightbox>
       )}
     </>
@@ -261,15 +261,16 @@ function RelatedMuscles({ muscleId }: { muscleId: string }) {
   const hits = similarMuscles(muscleId, 6);
   if (hits.length === 0) return null;
   return (
-    <div className="mt-4">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
-        הצלבה · שרירים קשורים
+    <div className="rounded-xl border border-[var(--accent)]/30 bg-[var(--paper-2)] p-3">
+      <h3 className="text-sm font-bold">הצלבה · שרירים קשורים</h3>
+      <p className="mt-0.5 text-[11px] text-[var(--ink-soft)]">
+        אותה קבוצה, אותו מפרק+תנועה, או אנטגוניסט — לשינון בהצלבה.
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
         {hits.map((h) => (
           <span
             key={h.muscle.id}
-            className="rounded-full bg-[var(--paper-2)] px-2.5 py-1 text-[11px]"
+            className="rounded-full border border-[var(--line)] bg-[var(--card)] px-2.5 py-1 text-[11px]"
             title={h.reasons.join(" · ")}
           >
             {h.muscle.nameHe}

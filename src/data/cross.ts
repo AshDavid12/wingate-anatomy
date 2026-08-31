@@ -1,6 +1,6 @@
 import { muscles } from "./muscles";
 import { FAMILIES, actionById, ACTION_ANTONYMS, type ActionId, type PlaneId } from "./planes";
-import { MUSCLE_TAGS, JOINT_TAGS, type JointTag } from "./muscle-tags";
+import { MUSCLE_TAGS, JOINT_TAGS, JOINT_PRIMARY_ACTIONS, type JointTag } from "./muscle-tags";
 import type { Muscle } from "./types";
 
 export function tagsFor(muscleId: string) {
@@ -13,6 +13,15 @@ export function musclesByAction(action: ActionId): Muscle[] {
 
 export function musclesByJoint(joint: JointTag): Muscle[] {
   return muscles.filter((m) => MUSCLE_TAGS[m.id]?.joints.includes(joint));
+}
+
+/** Actions a muscle actually produces at a given joint (biarticular-aware). */
+export function muscleActionsAtJoint(muscleId: string, joint: JointTag): ActionId[] {
+  const tags = MUSCLE_TAGS[muscleId];
+  if (!tags?.joints.includes(joint)) return [];
+  if (tags.at?.[joint]) return tags.at[joint];
+  const allowed = JOINT_PRIMARY_ACTIONS[joint];
+  return tags.actions.filter((a) => allowed.includes(a));
 }
 
 export function musclesByPlane(plane: PlaneId): Muscle[] {
@@ -97,11 +106,9 @@ export function similarMuscles(muscleId: string, limit = 8): SimilarHit[] {
 export function actionsAtJoint(joint: JointTag): ActionId[] {
   const set = new Set<ActionId>();
   for (const m of musclesByJoint(joint)) {
-    for (const a of MUSCLE_TAGS[m.id]?.actions ?? []) {
-      if (MUSCLE_TAGS[m.id]?.joints.includes(joint)) set.add(a);
-    }
+    for (const a of muscleActionsAtJoint(m.id, joint)) set.add(a);
   }
-  return [...set];
+  return JOINT_PRIMARY_ACTIONS[joint].filter((a) => set.has(a));
 }
 
 export function groupByJoint(list: Muscle[]): { joint: JointTag; he: string; muscles: Muscle[] }[] {

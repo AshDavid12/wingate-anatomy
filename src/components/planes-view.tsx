@@ -44,6 +44,8 @@ export function PlanesView() {
         </div>
       </section>
 
+      <PlaneDrill />
+
       <section className={cn("rounded-2xl border p-5", current.bg)}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -143,8 +145,6 @@ export function PlanesView() {
           </table>
         </div>
       </section>
-
-      <PlaneDrill />
 
       <section>
         <h2 className="text-xl font-bold">מושגי יסוד</h2>
