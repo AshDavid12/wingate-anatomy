@@ -1,5 +1,7 @@
 import { bones } from "./bones";
 import { muscles } from "./muscles";
+import { MUSCLE_TAGS, JOINT_TAGS } from "./muscle-tags";
+import { actionById } from "./planes";
 import type { Bone, Muscle } from "./types";
 
 export function musclesForBone(boneId: string): {
@@ -31,6 +33,8 @@ export function searchMuscles(query: string, list: Muscle[] = muscles): Muscle[]
       m.actionEn,
       m.innervation ?? "",
       m.notes ?? "",
+      ...(MUSCLE_TAGS[m.id]?.actions.map((a) => `${actionById(a)?.he ?? ""} ${actionById(a)?.en ?? ""}`) ?? []),
+      ...(MUSCLE_TAGS[m.id]?.joints.map((j) => JOINT_TAGS.find((x) => x.id === j)?.he ?? j) ?? []),
     ]
       .join(" ")
       .toLowerCase()

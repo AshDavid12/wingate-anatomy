@@ -4,7 +4,11 @@ import { useState } from "react";
 import { joints } from "@/data/joints";
 import { bones } from "@/data/bones";
 import { AnatomyLightbox, AnatomyThumb } from "@/components/anatomy-image";
+import { actionsAtJoint } from "@/data/cross";
+import { actionById } from "@/data/planes";
+import { PlaneBadge } from "@/components/planes-view";
 import type { Joint } from "@/data/types";
+import type { JointTag } from "@/data/muscle-tags";
 
 export function JointsView() {
   const [open, setOpen] = useState<Joint | null>(null);
@@ -48,6 +52,17 @@ export function JointsView() {
                     <li key={m}>{m}</li>
                   ))}
                 </ul>
+                <div className="mt-3 flex flex-wrap gap-1">
+                  {actionsAtJoint(j.id as JointTag).map((a) => {
+                    const meta = actionById(a);
+                    return (
+                      <span key={a} className="inline-flex items-center gap-1">
+                        <span className="text-[11px]">{meta?.he}</span>
+                        <PlaneBadge plane={meta?.plane ?? null} />
+                      </span>
+                    );
+                  })}
+                </div>
                 {j.notes && <p className="mt-3 text-xs text-[var(--accent)]">{j.notes}</p>}
               </div>
             </article>

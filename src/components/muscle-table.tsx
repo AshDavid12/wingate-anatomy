@@ -5,6 +5,11 @@ import type { Muscle } from "@/data/types";
 import { REGIONS, REGION_COLORS } from "@/data/regions";
 import { AnatomyLightbox, AnatomyThumb } from "@/components/anatomy-image";
 import { anatomyImage } from "@/data/anatomy-images";
+import { similarMuscles } from "@/data/cross";
+import { MUSCLE_TAGS } from "@/data/muscle-tags";
+import { actionById } from "@/data/planes";
+import { PlaneBadge } from "@/components/planes-view";
+import { JOINT_TAGS } from "@/data/muscle-tags";
 import { cn } from "@/lib/utils";
 
 type Hidden = { o: boolean; i: boolean; a: boolean };
@@ -168,6 +173,7 @@ export function MuscleTable({
               <p className="term mt-1 text-xs text-[var(--ink-soft)]">{open.actionEn}</p>
             </div>
           </div>
+          <RelatedMuscles muscleId={open.id} />
         </AnatomyLightbox>
       )}
     </>
@@ -176,6 +182,7 @@ export function MuscleTable({
 
 function MuscleName({ m }: { m: Muscle }) {
   const region = REGIONS.find((r) => r.id === m.region);
+  const tags = MUSCLE_TAGS[m.id];
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2">
@@ -187,16 +194,32 @@ function MuscleName({ m }: { m: Muscle }) {
         )}
       </div>
       <p className="term text-xs text-[var(--ink-soft)]">{m.nameEn}</p>
-      {region && (
-        <span
-          className={cn(
-            "mt-1 inline-block rounded-full border px-2 py-0.5 text-[10px] font-medium",
-            REGION_COLORS[m.region],
-          )}
-        >
-          {region.he}
-        </span>
-      )}
+      <div className="mt-1 flex flex-wrap gap-1">
+        {region && (
+          <span
+            className={cn(
+              "inline-block rounded-full border px-2 py-0.5 text-[10px] font-medium",
+              REGION_COLORS[m.region],
+            )}
+          >
+            {region.he}
+          </span>
+        )}
+        {tags?.joints.slice(0, 2).map((j) => (
+          <span key={j} className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[10px]">
+            {JOINT_TAGS.find((x) => x.id === j)?.he}
+          </span>
+        ))}
+        {[
+          ...new Set(
+            (tags?.actions ?? [])
+              .map((a) => actionById(a)?.plane)
+              .filter((p): p is NonNullable<typeof p> => Boolean(p)),
+          ),
+        ].map((p) => (
+          <PlaneBadge key={p} plane={p} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -230,6 +253,30 @@ export function EmptyState({ title, body }: { title: string; body: string }) {
     <div className="rounded-2xl border border-dashed border-[var(--line)] bg-[var(--card)] px-6 py-16 text-center">
       <p className="font-semibold">{title}</p>
       <p className="mt-1 text-sm text-[var(--ink-soft)]">{body}</p>
+    </div>
+  );
+}
+
+function RelatedMuscles({ muscleId }: { muscleId: string }) {
+  const hits = similarMuscles(muscleId, 6);
+  if (hits.length === 0) return null;
+  return (
+    <div className="mt-4">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
+        הצלבה · שרירים קשורים
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {hits.map((h) => (
+          <span
+            key={h.muscle.id}
+            className="rounded-full bg-[var(--paper-2)] px-2.5 py-1 text-[11px]"
+            title={h.reasons.join(" · ")}
+          >
+            {h.muscle.nameHe}
+            <span className="text-[var(--ink-soft)]"> — {h.reasons[0]}</span>
+          </span>
+        ))}
+      </div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Bone, Dumbbell, GraduationCap, Images, Layers, Search, Sparkles } from "lucide-react";
+import { Bone, Dumbbell, GraduationCap, Images, Layers, Move3d, Search, Sparkles, Waypoints } from "lucide-react";
 import { muscles } from "@/data/muscles";
 import { REGIONS, type RegionId } from "@/data/regions";
 import { searchMuscles } from "@/data/lookups";
@@ -10,20 +10,22 @@ import { BoneTable } from "@/components/bone-table";
 import { JointsView } from "@/components/joints-view";
 import { Flashcards } from "@/components/flashcards";
 import { Quiz } from "@/components/quiz";
-import { Glossary } from "@/components/glossary";
+import { PlanesView } from "@/components/planes-view";
+import { CrossView } from "@/components/cross-view";
 import { Atlas } from "@/components/atlas";
 import { cn } from "@/lib/utils";
 
-type Tab = "muscles" | "bones" | "joints" | "atlas" | "cards" | "quiz" | "terms";
+type Tab = "muscles" | "bones" | "joints" | "atlas" | "planes" | "cross" | "cards" | "quiz";
 
 const TABS: { id: Tab; label: string; icon: typeof Dumbbell }[] = [
   { id: "muscles", label: "שרירים", icon: Dumbbell },
   { id: "bones", label: "עצמות", icon: Bone },
   { id: "joints", label: "מפרקים", icon: Layers },
+  { id: "planes", label: "מישורים", icon: Move3d },
+  { id: "cross", label: "הצלבה", icon: Waypoints },
   { id: "atlas", label: "אטלס", icon: Images },
   { id: "cards", label: "כרטיסיות", icon: Sparkles },
   { id: "quiz", label: "חידון", icon: GraduationCap },
-  { id: "terms", label: "מושגים", icon: Search },
 ];
 
 export function StudyApp() {
@@ -97,7 +99,7 @@ export function StudyApp() {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-5 md:px-6 md:py-7">
-        {tab !== "quiz" && tab !== "terms" && tab !== "joints" && (
+        {tab !== "quiz" && tab !== "planes" && tab !== "joints" && tab !== "cross" && (
           <div className="mb-4 flex flex-col gap-3 no-print">
             <div className="relative">
               <Search className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-[var(--ink-soft)]" />
@@ -187,9 +189,10 @@ export function StudyApp() {
         {tab === "bones" && <BoneTable query={query} />}
         {tab === "joints" && <JointsView />}
         {tab === "atlas" && <Atlas query={query} />}
+        {tab === "planes" && <PlanesView />}
+        {tab === "cross" && <CrossView />}
         {tab === "cards" && <Flashcards muscles={filtered} />}
         {tab === "quiz" && <Quiz />}
-        {tab === "terms" && <Glossary />}
       </main>
       <footer className="border-t border-[var(--line)] px-4 py-4 text-center text-[11px] text-[var(--ink-soft)]">
         האיורים מתוך ויקיפדיה וויקישיתוף (Gray&apos;s Anatomy, BodyParts3D ועוד) — לשימוש לימודי.

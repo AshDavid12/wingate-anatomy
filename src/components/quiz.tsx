@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { muscles } from "@/data/muscles";
 import { anatomyImage } from "@/data/anatomy-images";
 import { AnatomyThumb } from "@/components/anatomy-image";
+import { ACTIONS, FAMILIES, PLANES, planeById } from "@/data/planes";
 import { cn } from "@/lib/utils";
 
-type Kind = "origin" | "insertion" | "action" | "name" | "picture";
+type Kind = "origin" | "insertion" | "action" | "name" | "picture" | "plane" | "family";
 
 type Question = {
   muscleId: string;
@@ -26,7 +27,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function pickKind(): Kind {
-  const kinds: Kind[] = ["origin", "insertion", "action", "name", "picture"];
+  const kinds: Kind[] = ["origin", "insertion", "action", "name", "picture", "plane", "family"];
   return kinds[Math.floor(Math.random() * kinds.length)];
 }
 
@@ -34,6 +35,34 @@ function buildQuestion(pool = muscles.filter((m) => m.core)): Question {
   let kind = pickKind();
   const pictured = pool.filter((m) => anatomyImage("muscles", m.id));
   if (kind === "picture" && pictured.length < 4) kind = "name";
+
+  if (kind === "plane") {
+    const moves = ACTIONS.filter((a) => a.plane);
+    const a = moves[Math.floor(Math.random() * moves.length)]!;
+    const p = planeById(a.plane!)!;
+    return {
+      muscleId: "trapezius",
+      kind: "plane",
+      prompt: `באיזה מישור מתבצעת ${a.he} (${a.en})?`,
+      answer: `${p.he} · ${p.en}`,
+      options: shuffle(PLANES.map((x) => `${x.he} · ${x.en}`)),
+    };
+  }
+
+  if (kind === "family") {
+    const f = FAMILIES[Math.floor(Math.random() * FAMILIES.length)]!;
+    const others = shuffle(FAMILIES.filter((x) => x.id !== f.id)).slice(0, 3);
+    return {
+      muscleId: f.members[0] ?? "trapezius",
+      kind: "family",
+      prompt: `לאיזו קבוצה שייכים ${f.members
+        .slice(0, 2)
+        .map((id) => muscles.find((m) => m.id === id)?.nameHe ?? id)
+        .join(" ו-")}?`,
+      answer: `${f.he} (${f.en})`,
+      options: shuffle([f, ...others].map((x) => `${x.he} (${x.en})`)),
+    };
+  }
 
   const source = kind === "picture" ? pictured : pool;
   const muscle = source[Math.floor(Math.random() * source.length)] ?? pool[0];
@@ -124,7 +153,7 @@ export function Quiz() {
           ציון: <span className="font-bold text-[var(--ink)]">{score.ok}</span> / {score.n}
           {score.n > 0 && <span> ({pct}%)</span>}
         </p>
-        <p className="text-xs text-[var(--ink-soft)]">שאלות בסגנון מבחן · ליבת החוברת</p>
+        <p className="text-xs text-[var(--ink-soft)]">שאלות בסגנון מבחן · Origin / מישורים / קבוצות</p>
       </div>
 
       <div className="rounded-3xl border border-[var(--line)] bg-[var(--card)] p-5 shadow-sm md:p-7">
