@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: #f3eee4;
+  --paper-2: #ebe4d6;
+  --ink: #1c1712;
+  --ink-soft: #4a4036;
+  --line: #d9cfc0;
+  --accent: #9b3a2a;
+  --accent-2: #1f5c57;
+  --card: #fffcf7;
+}
+
+html,
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-heebo), "Heebo", "Segoe UI", sans-serif;
+}
+
+.paper-grid {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(155, 58, 42, 0.06) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+.term {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.hide-study {
+  filter: blur(6px);
+  user-select: none;
+}
+
+.hide-study:hover,
+.hide-study:focus {
+  filter: none;
+  user-select: auto;
+}
+
+@media print {
+  header,
+  nav,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+  table {
+    font-size: 10px;
+  }
+}
