@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { muscles } from "@/data/muscles";
 import { anatomyImage } from "@/data/anatomy-images";
+import { dictionaryTerms } from "@/data/dictionary";
 import { AnatomyThumb } from "@/components/anatomy-image";
 import { ACTIONS, FAMILIES, PLANES, planeById } from "@/data/planes";
 import { cn } from "@/lib/utils";
 
-type Kind = "origin" | "insertion" | "action" | "name" | "picture" | "plane" | "family";
+type Kind = "origin" | "insertion" | "action" | "name" | "picture" | "plane" | "family" | "term";
 
 type Question = {
   muscleId: string;
@@ -27,7 +28,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function pickKind(): Kind {
-  const kinds: Kind[] = ["origin", "insertion", "action", "name", "picture", "plane", "family"];
+  const kinds: Kind[] = ["origin", "insertion", "action", "name", "picture", "plane", "family", "term"];
   return kinds[Math.floor(Math.random() * kinds.length)];
 }
 
@@ -47,6 +48,10 @@ function buildQuestion(pool = muscles.filter((m) => m.core)): Question {
       answer: `${p.he} · ${p.en}`,
       options: shuffle(PLANES.map((x) => `${x.he} · ${x.en}`)),
     };
+  }
+
+  if (kind === "term") {
+    return buildTermQuestion();
   }
 
   if (kind === "family") {
@@ -112,6 +117,49 @@ function buildQuestion(pool = muscles.filter((m) => m.core)): Question {
   };
 }
 
+function termLabel(t: (typeof dictionaryTerms)[number]) {
+  return t.en ? `${t.he} · ${t.en}` : t.he;
+}
+
+function buildTermQuestion(): Question {
+  const pool = dictionaryTerms.filter((t) => t.definition.trim().length >= 8);
+  const term = pool[Math.floor(Math.random() * pool.length)] ?? dictionaryTerms[0]!;
+  const unique = pool.filter((t) => t.id !== term.id && t.definition !== term.definition);
+  const sameTopic = unique.filter((t) => t.topic === term.topic);
+  const rest = unique.filter((t) => t.topic !== term.topic);
+  const distractors = shuffle([...sameTopic, ...rest])
+    .filter((t, _, arr) => arr.findIndex((x) => x.definition === t.definition) === arr.indexOf(t))
+    .slice(0, 3);
+
+  if (distractors.length < 3) {
+    return {
+      muscleId: "trapezius",
+      kind: "term",
+      prompt: `מה ההגדרה של ${term.he}?`,
+      answer: term.definition,
+      options: [term.definition],
+    };
+  }
+
+  if (Math.random() < 0.55) {
+    return {
+      muscleId: "trapezius",
+      kind: "term",
+      prompt: `מה ההגדרה של ${termLabel(term)}?`,
+      answer: term.definition,
+      options: shuffle([term.definition, ...distractors.map((d) => d.definition)]),
+    };
+  }
+
+  return {
+    muscleId: "trapezius",
+    kind: "term",
+    prompt: `איזה מונח מתואר? ${term.definition}`,
+    answer: termLabel(term),
+    options: shuffle([term, ...distractors].map(termLabel)),
+  };
+}
+
 export function Quiz() {
   const [q, setQ] = useState<Question | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
@@ -153,7 +201,7 @@ export function Quiz() {
           ציון: <span className="font-bold text-[var(--ink)]">{score.ok}</span> / {score.n}
           {score.n > 0 && <span> ({pct}%)</span>}
         </p>
-        <p className="text-xs text-[var(--ink-soft)]">שאלות בסגנון מבחן · Origin / מישורים / קבוצות</p>
+        <p className="text-xs text-[var(--ink-soft)]">שאלות בסגנון מבחן · Origin / מישורים / מילון</p>
       </div>
 
       <div className="rounded-3xl border border-[var(--line)] bg-[var(--card)] p-5 shadow-sm md:p-7">

@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Bone, Dumbbell, GraduationCap, Images, Layers, Move3d, Search, Sparkles, Waypoints } from "lucide-react";
+import { BookOpen, Bone, Dumbbell, GraduationCap, Images, Layers, Move3d, Search, Sparkles, Waypoints } from "lucide-react";
 import { muscles } from "@/data/muscles";
+import { dictionaryTerms } from "@/data/dictionary";
 import { REGIONS, type RegionId } from "@/data/regions";
 import { searchMuscles } from "@/data/lookups";
 import { MuscleTable } from "@/components/muscle-table";
@@ -13,9 +14,11 @@ import { Quiz } from "@/components/quiz";
 import { PlanesView } from "@/components/planes-view";
 import { CrossView } from "@/components/cross-view";
 import { Atlas } from "@/components/atlas";
+import { Glossary } from "@/components/glossary";
 import { cn } from "@/lib/utils";
 
-type Tab = "muscles" | "bones" | "joints" | "atlas" | "planes" | "cross" | "cards" | "quiz";
+type Tab = "muscles" | "bones" | "joints" | "atlas" | "planes" | "cross" | "glossary" | "cards" | "quiz";
+type CardDeck = "muscles" | "dictionary";
 
 const TABS: { id: Tab; label: string; icon: typeof Dumbbell }[] = [
   { id: "muscles", label: "שרירים", icon: Dumbbell },
@@ -23,6 +26,7 @@ const TABS: { id: Tab; label: string; icon: typeof Dumbbell }[] = [
   { id: "joints", label: "מפרקים", icon: Layers },
   { id: "planes", label: "מישורים", icon: Move3d },
   { id: "cross", label: "הצלבה", icon: Waypoints },
+  { id: "glossary", label: "מילון", icon: BookOpen },
   { id: "atlas", label: "אטלס", icon: Images },
   { id: "cards", label: "כרטיסיות", icon: Sparkles },
   { id: "quiz", label: "חידון", icon: GraduationCap },
@@ -32,6 +36,7 @@ export function StudyApp() {
   const [tab, setTab] = useState<Tab>("muscles");
   const [query, setQuery] = useState("");
   const [region, setRegion] = useState<RegionId | "all">("all");
+  const [cardDeck, setCardDeck] = useState<CardDeck>("muscles");
   const [coreOnly, setCoreOnly] = useState(false);
   const [hidden, setHidden] = useState<{ o: boolean; i: boolean; a: boolean }>({
     o: false,
@@ -59,16 +64,19 @@ export function StudyApp() {
                 אנטומיה למבחן
               </h1>
               <p className="mt-1 max-w-2xl text-sm text-[var(--ink-soft)]">
-                טבלת Origin, Insertion ו־Action לכל שריר, וטבלת עצמות עם השרירים
+                טבלת Origin, Insertion ו־Action לכל שריר, מילון שלד-שריר, וטבלת עצמות עם השרירים
                 שמתחילים ונאחזים בכל עצם — לפי מבנה חוברת משה שחר למדריכים ומאמנים.
               </p>
             </div>
-            <div className="flex items-center gap-2 text-xs text-[var(--ink-soft)]">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--ink-soft)]">
               <span className="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1">
                 {muscles.length} שרירים
               </span>
               <span className="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1">
                 29 עצמות / קבוצות
+              </span>
+              <span className="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1">
+                {dictionaryTerms.length} מונחי מילון
               </span>
             </div>
           </div>
@@ -106,12 +114,33 @@ export function StudyApp() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="חיפוש שריר, עצם, origin, insertion, תנועה או איור…"
+                placeholder={
+                  tab === "glossary" || (tab === "cards" && cardDeck === "dictionary")
+                    ? "חיפוש מונח בעברית, באנגלית או לפי נושא…"
+                    : "חיפוש שריר, עצם, origin, insertion, תנועה או איור…"
+                }
                 className="w-full rounded-xl border border-[var(--line)] bg-[var(--card)] py-2.5 pr-10 pl-3 text-sm outline-none ring-[var(--accent-2)] focus:ring-2"
               />
             </div>
 
-            {(tab === "muscles" || tab === "cards") && (
+            {tab === "cards" && (
+              <div className="flex flex-wrap gap-1.5">
+                <FilterChip
+                  active={cardDeck === "muscles"}
+                  onClick={() => setCardDeck("muscles")}
+                >
+                  שרירים
+                </FilterChip>
+                <FilterChip
+                  active={cardDeck === "dictionary"}
+                  onClick={() => setCardDeck("dictionary")}
+                >
+                  מילון שלד-שריר ({dictionaryTerms.length})
+                </FilterChip>
+              </div>
+            )}
+
+            {(tab === "muscles" || (tab === "cards" && cardDeck === "muscles")) && (
               <>
                 <div className="flex flex-wrap gap-1.5">
                   <FilterChip active={region === "all"} onClick={() => setRegion("all")}>
@@ -191,7 +220,10 @@ export function StudyApp() {
         {tab === "atlas" && <Atlas query={query} />}
         {tab === "planes" && <PlanesView />}
         {tab === "cross" && <CrossView />}
-        {tab === "cards" && <Flashcards muscles={filtered} />}
+        {tab === "glossary" && <Glossary query={query} />}
+        {tab === "cards" && (
+          <Flashcards muscles={filtered} deck={cardDeck} query={query} />
+        )}
         {tab === "quiz" && <Quiz />}
       </main>
       <footer className="border-t border-[var(--line)] px-4 py-4 text-center text-[11px] text-[var(--ink-soft)]">
