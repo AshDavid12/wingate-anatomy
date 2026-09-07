@@ -17,7 +17,7 @@
 ```bash
 npm install
 npm run dev
-``` here
+``` 
 
 ברירת המחדל: [http://localhost:4317](http://localhost:4317)
 
