@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { musclesForBone, searchBones } from "@/data/lookups";
+import { landmarksForBone } from "@/data/landmarks";
 import { EmptyState } from "@/components/muscle-table";
 import { AnatomyLightbox, AnatomyThumb } from "@/components/anatomy-image";
+import { NamePair } from "@/components/name-pair";
 import { cn } from "@/lib/utils";
 import type { Bone, Muscle } from "@/data/types";
 
@@ -55,11 +57,11 @@ export function BoneTable({ query }: { query: string }) {
                         onOpen={() => setLightbox(b)}
                       />
                       <div>
-                        <p className="font-bold">{b.nameHe}</p>
-                        <p className="term text-xs text-[var(--ink-soft)]">{b.nameEn}</p>
+                        <NamePair en={b.nameEn} he={b.nameHe} heClassName="text-xs" />
                         <p className="mt-1 text-[11px] text-[var(--ink-soft)]">
                           {SKELETON_LABEL[b.skeleton]} · {b.type} ({b.typeEn})
                         </p>
+                        <LandmarkList boneId={b.id} />
                       </div>
                     </div>
                   </td>
@@ -109,8 +111,7 @@ export function BoneTable({ query }: { query: string }) {
                 onClick={() => setOpenId(open ? null : b.id)}
               >
                 <div>
-                  <p className="font-bold">{b.nameHe}</p>
-                  <p className="term text-xs text-[var(--ink-soft)]">{b.nameEn}</p>
+                  <NamePair en={b.nameEn} he={b.nameHe} heClassName="text-xs" />
                   <p className="mt-1 text-[11px] text-[var(--ink-soft)]">
                     {SKELETON_LABEL[b.skeleton]} · {b.type}
                   </p>
@@ -140,9 +141,12 @@ export function BoneTable({ query }: { query: string }) {
                     ))}
                   </ul>
                 </div>
-                <p className="text-xs text-[var(--ink-soft)]">
-                  Landmarks: {b.landmarks.join(" · ")}
-                </p>
+                <LandmarkList boneId={b.id} />
+                {landmarksForBone(b.id).length === 0 && (
+                  <p className="text-xs text-[var(--ink-soft)]">
+                    Landmarks: {b.landmarks.join(" · ")}
+                  </p>
+                )}
               </div>
             </article>
           );
@@ -155,20 +159,37 @@ export function BoneTable({ query }: { query: string }) {
           onClose={() => setLightbox(null)}
           kind="bones"
           id={lightbox.id}
-          title={lightbox.nameHe}
-          subtitle={lightbox.nameEn}
+          title={lightbox.nameEn}
+          subtitle={lightbox.nameHe}
         >
           <ul className="list-disc pr-4 text-sm">
             {lightbox.movements.map((mv) => (
               <li key={mv}>{mv}</li>
             ))}
           </ul>
-          <p className="mt-2 text-xs text-[var(--ink-soft)]">
-            Landmarks: {lightbox.landmarks.join(" · ")}
-          </p>
+          <LandmarkList boneId={lightbox.id} />
+          {landmarksForBone(lightbox.id).length === 0 && (
+            <p className="mt-2 text-xs text-[var(--ink-soft)]">
+              Landmarks: {lightbox.landmarks.join(" · ")}
+            </p>
+          )}
         </AnatomyLightbox>
       )}
     </div>
+  );
+}
+
+function LandmarkList({ boneId }: { boneId: string }) {
+  const parts = landmarksForBone(boneId);
+  if (parts.length === 0) return null;
+  return (
+    <ul className="mt-2 space-y-0.5 text-[11px] leading-relaxed text-[var(--ink-soft)]">
+      {parts.map((l) => (
+        <li key={l.id}>
+          <NamePair en={l.nameEn} he={l.nameHe} stacked={false} enClassName="text-[var(--ink)]" />
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -182,9 +203,10 @@ function MuscleChips({ list, empty }: { list: Muscle[]; empty: string }) {
         <span
           key={m.id}
           className="rounded-full bg-[var(--paper-2)] px-2 py-0.5 text-[11px]"
-          title={m.nameEn}
+          title={m.nameHe}
         >
-          {m.nameHe}
+          <span className="term font-bold">{m.nameEn}</span>
+          <span className="text-[var(--ink-soft)]"> · {m.nameHe}</span>
         </span>
       ))}
     </div>

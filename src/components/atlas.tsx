@@ -104,8 +104,8 @@ export function Atlas({ query }: { query: string }) {
               interactive={false}
             />
             <div className="px-3 py-2">
-              <p className="line-clamp-1 text-sm font-bold">{item.he}</p>
-              <p className="term line-clamp-1 text-[11px] text-[var(--ink-soft)]">{item.en}</p>
+              <p className="term line-clamp-1 text-sm font-bold">{item.en}</p>
+              <p className="line-clamp-1 text-[11px] text-[var(--ink-soft)]">{item.he}</p>
               {item.badge && (
                 <span
                   className={cn(
@@ -127,8 +127,8 @@ export function Atlas({ query }: { query: string }) {
           onClose={() => setOpenId(null)}
           kind={kind}
           id={open.id}
-          title={open.he}
-          subtitle={open.en}
+          title={open.en}
+          subtitle={open.he}
         />
       )}
     </div>

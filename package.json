@@ -4,10 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 4317",
+    "restart": "bash scripts/restart-dev.sh",
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p ${PORT:-4317}",
     "lint": "next lint",
-    "anatomy:images": "node --experimental-strip-types scripts/download-anatomy-images.mjs"
+    "anatomy:images": "node --experimental-strip-types scripts/download-anatomy-images.mjs",
+    "anatomy:landmarks": "node --experimental-strip-types scripts/download-landmark-images.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

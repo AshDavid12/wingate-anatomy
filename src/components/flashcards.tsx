@@ -3,8 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Muscle } from "@/data/types";
 import { DICTIONARY_TOPICS, dictionaryTerms, searchDictionary } from "@/data/dictionary";
+import { LANDMARK_REGIONS, examLandmarks, searchLandmarks, type LandmarkRegionId } from "@/data/landmarks";
+import { anatomyImage } from "@/data/anatomy-images";
 import { EmptyState } from "@/components/muscle-table";
 import { AnatomyThumb } from "@/components/anatomy-image";
+import { NamePair } from "@/components/name-pair";
 import { cn } from "@/lib/utils";
 
 export function Flashcards({
@@ -13,11 +16,14 @@ export function Flashcards({
   query = "",
 }: {
   muscles: Muscle[];
-  deck: "muscles" | "dictionary";
+  deck: "muscles" | "dictionary" | "landmarks";
   query?: string;
 }) {
   if (deck === "dictionary") {
     return <DictionaryCards query={query} />;
+  }
+  if (deck === "landmarks") {
+    return <LandmarkCards query={query} />;
   }
   return <MuscleCards muscles={muscles} />;
 }
@@ -77,8 +83,8 @@ function MuscleCards({ muscles }: { muscles: Muscle[] }) {
               className="mx-auto mt-4"
               interactive={false}
             />
-            <h2 className="mt-3 text-3xl font-bold">{m.nameHe}</h2>
-            <p className="term mt-2 text-lg opacity-70">{m.nameEn}</p>
+            <h2 className="term mt-3 text-3xl font-bold">{m.nameEn}</h2>
+            <p className="mt-2 text-lg opacity-70">{m.nameHe}</p>
             <p className="mt-6 text-sm opacity-60">לחצו לחשיפת Origin · Insertion · Action</p>
           </div>
         ) : (
@@ -92,9 +98,14 @@ function MuscleCards({ muscles }: { muscles: Muscle[] }) {
                 className="border-[var(--ink-soft)]/30"
                 interactive={false}
               />
-              <h2 className="text-xl font-bold">
-                {m.nameHe}{" "}
-                <span className="term text-base font-normal opacity-70">· {m.nameEn}</span>
+              <h2 className="text-xl">
+                <NamePair
+                  en={m.nameEn}
+                  he={m.nameHe}
+                  stacked={false}
+                  enClassName="text-xl"
+                  heClassName="text-base opacity-70"
+                />
               </h2>
             </div>
             <Block label="Origin" he={m.originHe} en={m.originEn} />
@@ -176,8 +187,8 @@ function DictionaryCards({ query }: { query: string }) {
         {!flipped ? (
           <div className="flex h-full min-h-[280px] flex-col items-center justify-center text-center">
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">{t.topic}</p>
-            <h2 className="mt-4 text-3xl font-bold">{t.he}</h2>
-            {t.en && <p className="term mt-2 text-lg opacity-70">{t.en}</p>}
+            <h2 className="term mt-4 text-3xl font-bold">{t.en || t.he}</h2>
+            {t.en && <p className="mt-2 text-lg opacity-70">{t.he}</p>}
             <p className="mt-6 text-sm opacity-60">לחצו לחשיפת ההגדרה</p>
           </div>
         ) : (
@@ -185,11 +196,127 @@ function DictionaryCards({ query }: { query: string }) {
             <p className="text-[10px] font-semibold uppercase tracking-wider opacity-70">
               {t.topic}
             </p>
-            <h2 className="mt-2 text-2xl font-bold">
-              {t.he}
-              {t.en && <span className="term text-lg font-normal opacity-70"> · {t.en}</span>}
+            <h2 className="mt-2 text-2xl">
+              <NamePair
+                en={t.en}
+                he={t.he}
+                stacked={false}
+                enClassName="text-2xl"
+                heClassName="text-lg opacity-70"
+              />
             </h2>
             <p className="mt-6 text-base leading-relaxed">{t.definition}</p>
+          </div>
+        )}
+      </button>
+      <CardNav onPrev={() => next(-1)} onNext={() => next(1)} onKnown={markKnown} />
+    </div>
+  );
+}
+
+function LandmarkCards({ query }: { query: string }) {
+  const [region, setRegion] = useState<LandmarkRegionId | "all">("all");
+  const [index, setIndex] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [known, setKnown] = useState<Set<string>>(new Set());
+
+  const cards = useMemo(() => {
+    const list = searchLandmarks(query, examLandmarks);
+    return region === "all" ? list : list.filter((l) => l.region === region);
+  }, [query, region]);
+
+  useEffect(() => {
+    setIndex(0);
+    setFlipped(false);
+  }, [query, region, cards.length]);
+
+  if (cards.length === 0) {
+    return <EmptyState title="אין כרטיסיות" body="שנו את החיפוש או אזור העצם." />;
+  }
+
+  const i = index % cards.length;
+  const l = cards[i];
+  if (!l) {
+    return <EmptyState title="אין כרטיסיות" body="שנו את החיפוש או אזור העצם." />;
+  }
+
+  function next(delta: number) {
+    setFlipped(false);
+    setIndex((n) => (n + delta + cards.length) % cards.length);
+  }
+
+  function markKnown() {
+    setKnown((s) => new Set(s).add(l.id));
+    next(1);
+  }
+
+  const imgKind = anatomyImage("landmarks", l.id) ? "landmarks" : "bones";
+  const imgId = imgKind === "landmarks" ? l.id : l.boneId;
+  const regionHe = LANDMARK_REGIONS.find((r) => r.id === l.region)?.he;
+
+  return (
+    <div className="mx-auto max-w-xl">
+      <div className="mb-4 flex flex-wrap justify-center gap-1.5">
+        <TopicChip active={region === "all"} onClick={() => setRegion("all")}>
+          הכל ({searchLandmarks(query, examLandmarks).length})
+        </TopicChip>
+        {LANDMARK_REGIONS.map((r) => {
+          const n = searchLandmarks(query, examLandmarks).filter((x) => x.region === r.id).length;
+          if (n === 0) return null;
+          return (
+            <TopicChip key={r.id} active={region === r.id} onClick={() => setRegion(r.id)}>
+              <span className="term font-bold">{r.en}</span> · {r.he}
+            </TopicChip>
+          );
+        })}
+      </div>
+      <p className="mb-3 text-center text-sm text-[var(--ink-soft)]">
+        כרטיס {i + 1} מתוך {cards.length} · סימנתם כ״יודע״ {known.size}
+      </p>
+      <button
+        type="button"
+        onClick={() => setFlipped((f) => !f)}
+        className={cn(
+          "min-h-[360px] w-full rounded-3xl border border-[var(--line)] p-6 text-right shadow-md transition",
+          flipped ? "bg-[var(--ink)] text-[var(--paper)]" : "bg-[var(--card)]",
+        )}
+      >
+        {!flipped ? (
+          <div className="flex h-full min-h-[320px] flex-col items-center justify-center text-center">
+            <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)]">
+              {regionHe} · איזה חלק?
+            </p>
+            <AnatomyThumb
+              kind={imgKind}
+              id={imgId}
+              alt="חלק עצם"
+              size="md"
+              className="mx-auto mt-4 h-40 w-40"
+              interactive={false}
+            />
+            <p className="mt-6 text-sm opacity-60">לחצו לחשיפת השם והמיקום</p>
+          </div>
+        ) : (
+          <div className="space-y-3 text-sm leading-relaxed">
+            <AnatomyThumb
+              kind={imgKind}
+              id={imgId}
+              alt={l.nameHe}
+              size="sm"
+              className="mx-auto border-[var(--ink-soft)]/30"
+              interactive={false}
+            />
+            <h2 className="text-center text-2xl">
+              <NamePair
+                en={l.nameEn}
+                he={l.nameHe}
+                stacked
+                enClassName="text-2xl"
+                heClassName="text-base opacity-70"
+              />
+            </h2>
+            <Block label="Location" he={l.locationHe} en={l.viewHe ?? ""} />
+            {l.note && <Block label="לזכור למבחן" he={l.note} en="" />}
           </div>
         )}
       </button>
@@ -238,8 +365,7 @@ function Block({ label, he, en }: { label: string; he: string; en: string }) {
   return (
     <div>
       <p className="text-[10px] font-semibold uppercase tracking-wider opacity-70">{label}</p>
-      <p className="mt-0.5">{he}</p>
-      <p className="term mt-0.5 text-xs opacity-70">{en}</p>
+      {en ? <NamePair en={en} he={he} enClassName="mt-0.5" heClassName="text-xs opacity-70" /> : <p className="mt-0.5">{he}</p>}
     </div>
   );
 }

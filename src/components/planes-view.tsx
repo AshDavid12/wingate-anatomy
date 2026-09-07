@@ -34,8 +34,8 @@ export function PlanesView() {
                   plane === p.id ? "ring-2 ring-[var(--ink)]" : "opacity-90 hover:opacity-100",
                 )}
               >
-                <p className="term text-[11px] font-semibold uppercase tracking-wide">{p.en}</p>
-                <h3 className="mt-1 text-lg font-bold">{p.he}</h3>
+                <p className="term text-lg font-bold">{p.en}</p>
+                <h3 className="mt-1 text-sm text-[var(--ink-soft)]">{p.he}</h3>
                 <p className="mt-2 text-xs leading-relaxed">{p.splits}</p>
                 <p className="mt-1 text-xs text-[var(--ink-soft)]">{p.axisHe}</p>
               </button>
@@ -49,8 +49,8 @@ export function PlanesView() {
       <section className={cn("rounded-2xl border p-5", current.bg)}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="term text-xs font-semibold uppercase">{current.en}</p>
-            <h3 className="text-xl font-bold">{current.he}</h3>
+            <p className="term text-xl font-bold">{current.en}</p>
+            <h3 className="text-sm text-[var(--ink-soft)]">{current.he}</h3>
             <p className="mt-2 max-w-2xl text-sm">{current.mnemonic}</p>
             <p className="mt-1 text-xs text-[var(--ink-soft)]">
               ציר התנועה: {current.axisHe} · {current.axisEn}
@@ -69,8 +69,8 @@ export function PlanesView() {
           <table className="w-full text-sm">
             <thead className="bg-white/50 text-xs text-[var(--ink-soft)]">
               <tr>
-                <th className="px-3 py-2 text-right">תנועה</th>
                 <th className="px-3 py-2 text-right">English</th>
+                <th className="px-3 py-2 text-right">עברית</th>
                 <th className="px-3 py-2 text-right">שרירים לדוגמה</th>
               </tr>
             </thead>
@@ -79,16 +79,17 @@ export function PlanesView() {
                 const examples = musclesByAction(a.id).slice(0, 4);
                 return (
                   <tr key={a.id} className="border-t border-[var(--line)] align-top">
-                    <td className="px-3 py-2 font-medium">
+                    <td className="term px-3 py-2 font-bold">{a.en}</td>
+                    <td className="px-3 py-2 text-[var(--ink-soft)]">
                       {a.he}
-                      <p className="text-[11px] font-normal text-[var(--ink-soft)]">{a.note}</p>
+                      <p className="text-[11px] font-normal">{a.note}</p>
                     </td>
-                    <td className="term px-3 py-2">{a.en}</td>
                     <td className="px-3 py-2">
                       <div className="flex flex-wrap gap-1">
                         {examples.map((m) => (
                           <span key={m.id} className="rounded-full bg-[var(--paper-2)] px-2 py-0.5 text-[11px]">
-                            {m.nameHe}
+                            <span className="term font-bold">{m.nameEn}</span>
+                            <span className="text-[var(--ink-soft)]"> · {m.nameHe}</span>
                           </span>
                         ))}
                       </div>
@@ -113,8 +114,8 @@ export function PlanesView() {
           <table className="w-full text-sm">
             <thead className="bg-[var(--paper-2)] text-xs text-[var(--ink-soft)]">
               <tr>
-                <th className="px-4 py-2 text-right">תנועה</th>
                 <th className="px-4 py-2 text-right">English</th>
+                <th className="px-4 py-2 text-right">עברית</th>
                 <th className="px-4 py-2 text-right">מישור</th>
                 <th className="px-4 py-2 text-right">הסבר</th>
               </tr>
@@ -124,11 +125,11 @@ export function PlanesView() {
                 const p = planeById(a.plane as PlaneId)!;
                 return (
                   <tr key={a.id} className="border-t border-[var(--line)] even:bg-[var(--paper)]/50">
-                    <td className="px-4 py-2 font-medium">{a.he}</td>
-                    <td className="term px-4 py-2">{a.en}</td>
+                    <td className="term px-4 py-2 font-bold">{a.en}</td>
+                    <td className="px-4 py-2 text-[var(--ink-soft)]">{a.he}</td>
                     <td className="px-4 py-2">
                       <span className={cn("rounded-full border px-2 py-0.5 text-xs", p.bg, hide && "hide-study")}>
-                        {p.he} · {p.en.split(" ")[0]}
+                        {p.en.split(" ")[0]} · {p.he}
                       </span>
                     </td>
                     <td className="px-4 py-2 text-[var(--ink-soft)]">{a.note}</td>
@@ -136,8 +137,8 @@ export function PlanesView() {
                 );
               })}
               <tr className="border-t border-[var(--line)]">
-                <td className="px-4 py-2 font-medium">סיבוב מעגלי</td>
-                <td className="term px-4 py-2">Circumduction</td>
+                <td className="term px-4 py-2 font-bold">Circumduction</td>
+                <td className="px-4 py-2 text-[var(--ink-soft)]">סיבוב מעגלי</td>
                 <td className="px-4 py-2 text-xs">רב-מישורי</td>
                 <td className="px-4 py-2 text-[var(--ink-soft)]">שילוב כפיפה, הרחקה, פשיטה וקרוב</td>
               </tr>
@@ -163,8 +164,8 @@ export function PlanesView() {
         <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-5">
           {directionalTerms.map((t) => (
             <div key={t.en} className="rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 py-3">
-              <p className="term text-xs text-[var(--ink-soft)]">{t.en}</p>
-              <p className="font-semibold">{t.he}</p>
+              <p className="term font-bold">{t.en}</p>
+              <p className="text-sm text-[var(--ink-soft)]">{t.he}</p>
             </div>
           ))}
         </div>
@@ -243,11 +244,11 @@ function PlaneDrill() {
   return (
     <section className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-5">
       <h2 className="text-xl font-bold">תרגול מהיר: באיזה מישור?</h2>
-      <p className="mt-4 text-center text-2xl font-bold">{a.he}</p>
-      <p className="term text-center text-sm text-[var(--ink-soft)]">{a.en}</p>
+      <p className="term mt-4 text-center text-2xl font-bold">{a.en}</p>
+      <p className="text-center text-sm text-[var(--ink-soft)]">{a.he}</p>
       {show ? (
         <p className={cn("mt-3 text-center text-lg font-semibold", p.color)}>
-          {p.he} · {p.en}
+          {p.en} · {p.he}
         </p>
       ) : (
         <p className="mt-3 text-center text-sm text-[var(--ink-soft)]">נחשו ואז חשפו</p>
@@ -281,5 +282,10 @@ export function PlaneBadge({ plane }: { plane: PlaneId | null | undefined }) {
   }
   const p = planeById(plane);
   if (!p) return null;
-  return <span className={cn("rounded-full border px-2 py-0.5 text-[11px]", p.bg)}>{p.he}</span>;
+  return (
+    <span className={cn("rounded-full border px-2 py-0.5 text-[11px]", p.bg)}>
+      <span className="term font-bold">{p.en.split(" ")[0]}</span>
+      <span> · {p.he}</span>
+    </span>
+  );
 }

@@ -10,6 +10,7 @@ import { MUSCLE_TAGS } from "@/data/muscle-tags";
 import { actionById } from "@/data/planes";
 import { PlaneBadge } from "@/components/planes-view";
 import { JOINT_TAGS } from "@/data/muscle-tags";
+import { bilingual, NamePair } from "@/components/name-pair";
 import { cn } from "@/lib/utils";
 
 type Hidden = { o: boolean; i: boolean; a: boolean };
@@ -83,16 +84,13 @@ export function MuscleTable({
                   </div>
                 </td>
                 <td className={cn("px-4 py-3", hidden.o && "hide-study")}>
-                  <p>{m.originHe}</p>
-                  <p className="term mt-1 text-xs text-[var(--ink-soft)]">{m.originEn}</p>
+                  <NamePair en={m.originEn} he={m.originHe} enClassName="text-sm" heClassName="text-xs" />
                 </td>
                 <td className={cn("px-4 py-3", hidden.i && "hide-study")}>
-                  <p>{m.insertionHe}</p>
-                  <p className="term mt-1 text-xs text-[var(--ink-soft)]">{m.insertionEn}</p>
+                  <NamePair en={m.insertionEn} he={m.insertionHe} enClassName="text-sm" heClassName="text-xs" />
                 </td>
                 <td className={cn("px-4 py-3", hidden.a && "hide-study")}>
-                  <p>{m.actionHe}</p>
-                  <p className="term mt-1 text-xs text-[var(--ink-soft)]">{m.actionEn}</p>
+                  <NamePair en={m.actionEn} he={m.actionHe} enClassName="text-sm" heClassName="text-xs" />
                   {m.innervation && (
                     <p className="mt-1 text-[11px] text-[var(--ink-soft)]">עצבוב: {m.innervation}</p>
                   )}
@@ -137,8 +135,8 @@ export function MuscleTable({
           onClose={() => setRegionOpen(false)}
           kind="regions"
           id={regionBannerId}
-          title={REGIONS.find((r) => r.id === regionBannerId)?.he ?? "אזור"}
-          subtitle={REGIONS.find((r) => r.id === regionBannerId)?.en}
+          title={REGIONS.find((r) => r.id === regionBannerId)?.en ?? "Region"}
+          subtitle={REGIONS.find((r) => r.id === regionBannerId)?.he}
         />
       )}
       {open && (
@@ -147,8 +145,8 @@ export function MuscleTable({
           onClose={() => setOpen(null)}
           kind="muscles"
           id={open.id}
-          title={open.nameHe}
-          subtitle={open.nameEn}
+          title={open.nameEn}
+          subtitle={open.nameHe}
         >
           <RelatedMuscles muscleId={open.id} />
           <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
@@ -156,22 +154,19 @@ export function MuscleTable({
               <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
                 Origin
               </p>
-              <p>{open.originHe}</p>
-              <p className="term mt-1 text-xs text-[var(--ink-soft)]">{open.originEn}</p>
+              <NamePair en={open.originEn} he={open.originHe} enClassName="text-sm" heClassName="text-xs" />
             </div>
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
                 Insertion
               </p>
-              <p>{open.insertionHe}</p>
-              <p className="term mt-1 text-xs text-[var(--ink-soft)]">{open.insertionEn}</p>
+              <NamePair en={open.insertionEn} he={open.insertionHe} enClassName="text-sm" heClassName="text-xs" />
             </div>
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
                 Action
               </p>
-              <p>{open.actionHe}</p>
-              <p className="term mt-1 text-xs text-[var(--ink-soft)]">{open.actionEn}</p>
+              <NamePair en={open.actionEn} he={open.actionHe} enClassName="text-sm" heClassName="text-xs" />
             </div>
           </div>
         </AnatomyLightbox>
@@ -186,14 +181,14 @@ function MuscleName({ m }: { m: Muscle }) {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-bold">{m.nameHe}</span>
+        <span className="term font-bold">{m.nameEn}</span>
         {!m.core && (
           <span className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[10px] text-[var(--ink-soft)]">
             הרחבה
           </span>
         )}
       </div>
-      <p className="term text-xs text-[var(--ink-soft)]">{m.nameEn}</p>
+      <p className="text-xs text-[var(--ink-soft)]">{m.nameHe}</p>
       <div className="mt-1 flex flex-wrap gap-1">
         {region && (
           <span
@@ -202,12 +197,15 @@ function MuscleName({ m }: { m: Muscle }) {
               REGION_COLORS[m.region],
             )}
           >
-            {region.he}
+            {region.en} · {region.he}
           </span>
         )}
         {tags?.joints.slice(0, 2).map((j) => (
           <span key={j} className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[10px]">
-            {JOINT_TAGS.find((x) => x.id === j)?.he}
+            {(() => {
+              const jt = JOINT_TAGS.find((x) => x.id === j);
+              return jt ? bilingual(jt.en, jt.he) : j;
+            })()}
           </span>
         ))}
         {[
@@ -241,8 +239,7 @@ function Field({
         {label}
       </p>
       <div className={cn(hidden && "hide-study")}>
-        <p className="mt-0.5 text-sm">{he}</p>
-        <p className="term text-xs text-[var(--ink-soft)]">{en}</p>
+        <NamePair en={en} he={he} enClassName="text-sm" heClassName="text-xs" />
       </div>
     </div>
   );
@@ -273,7 +270,7 @@ function RelatedMuscles({ muscleId }: { muscleId: string }) {
             className="rounded-full border border-[var(--line)] bg-[var(--card)] px-2.5 py-1 text-[11px]"
             title={h.reasons.join(" · ")}
           >
-            {h.muscle.nameHe}
+            {bilingual(h.muscle.nameEn, h.muscle.nameHe)}
             <span className="text-[var(--ink-soft)]"> — {h.reasons[0]}</span>
           </span>
         ))}

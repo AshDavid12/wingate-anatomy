@@ -31,6 +31,11 @@ export type Bone = {
   notes?: string;
 };
 
+export type JointDetail = {
+  title: string;
+  items: string[];
+};
+
 export type Joint = {
   id: string;
   nameHe: string;
@@ -40,4 +45,5 @@ export type Joint = {
   typeEn: string;
   movements: string[];
   notes?: string;
+  details?: JointDetail[];
 };

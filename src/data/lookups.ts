@@ -1,5 +1,6 @@
 import { bones } from "./bones";
 import { muscles } from "./muscles";
+import { landmarks } from "./landmarks";
 import { MUSCLE_TAGS, JOINT_TAGS } from "./muscle-tags";
 import { actionById } from "./planes";
 import type { Bone, Muscle } from "./types";
@@ -45,10 +46,13 @@ export function searchMuscles(query: string, list: Muscle[] = muscles): Muscle[]
 export function searchBones(query: string, list: typeof bones = bones): Bone[] {
   const q = query.trim().toLowerCase();
   if (!q) return list;
-  return list.filter((b) =>
-    [b.nameHe, b.nameEn, b.type, b.typeEn, ...b.landmarks, ...b.joints, ...b.movements, b.notes ?? ""]
+  return list.filter((b) => {
+    const parts = landmarks
+      .filter((l) => l.boneId === b.id)
+      .flatMap((l) => [l.nameHe, l.nameEn, l.locationHe]);
+    return [b.nameHe, b.nameEn, b.type, b.typeEn, ...b.landmarks, ...b.joints, ...b.movements, b.notes ?? "", ...parts]
       .join(" ")
       .toLowerCase()
-      .includes(q),
-  );
+      .includes(q);
+  });
 }

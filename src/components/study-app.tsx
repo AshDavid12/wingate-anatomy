@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BookOpen, Bone, Dumbbell, GraduationCap, Images, Layers, Move3d, Search, Sparkles, Waypoints } from "lucide-react";
+import { BookOpen, Bone, Dumbbell, GraduationCap, Images, Layers, Move3d, ScanSearch, Search, Sparkles, Waypoints } from "lucide-react";
 import { muscles } from "@/data/muscles";
 import { dictionaryTerms } from "@/data/dictionary";
+import { examLandmarks } from "@/data/landmarks";
 import { REGIONS, type RegionId } from "@/data/regions";
 import { searchMuscles } from "@/data/lookups";
 import { MuscleTable } from "@/components/muscle-table";
@@ -15,14 +16,16 @@ import { PlanesView } from "@/components/planes-view";
 import { CrossView } from "@/components/cross-view";
 import { Atlas } from "@/components/atlas";
 import { Glossary } from "@/components/glossary";
+import { LandmarksView } from "@/components/landmarks-view";
 import { cn } from "@/lib/utils";
 
-type Tab = "muscles" | "bones" | "joints" | "atlas" | "planes" | "cross" | "glossary" | "cards" | "quiz";
-type CardDeck = "muscles" | "dictionary";
+type Tab = "muscles" | "bones" | "landmarks" | "joints" | "atlas" | "planes" | "cross" | "glossary" | "cards" | "quiz";
+type CardDeck = "muscles" | "dictionary" | "landmarks";
 
 const TABS: { id: Tab; label: string; icon: typeof Dumbbell }[] = [
   { id: "muscles", label: "שרירים", icon: Dumbbell },
   { id: "bones", label: "עצמות", icon: Bone },
+  { id: "landmarks", label: "חלקי עצם", icon: ScanSearch },
   { id: "joints", label: "מפרקים", icon: Layers },
   { id: "planes", label: "מישורים", icon: Move3d },
   { id: "cross", label: "הצלבה", icon: Waypoints },
@@ -64,8 +67,8 @@ export function StudyApp() {
                 אנטומיה למבחן
               </h1>
               <p className="mt-1 max-w-2xl text-sm text-[var(--ink-soft)]">
-                טבלת Origin, Insertion ו־Action לכל שריר, מילון שלד-שריר, וטבלת עצמות עם השרירים
-                שמתחילים ונאחזים בכל עצם — לפי מבנה חוברת משה שחר למדריכים ומאמנים.
+                טבלת Origin, Insertion ו־Action לכל שריר, חלקי עצם עם איורים לזיהוי במבחן,
+                מילון שלד-שריר, וטבלת עצמות עם השרירים שמתחילים ונאחזים בכל עצם.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--ink-soft)]">
@@ -74,6 +77,9 @@ export function StudyApp() {
               </span>
               <span className="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1">
                 29 עצמות / קבוצות
+              </span>
+              <span className="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1">
+                {examLandmarks.length} חלקי עצם
               </span>
               <span className="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1">
                 {dictionaryTerms.length} מונחי מילון
@@ -117,7 +123,9 @@ export function StudyApp() {
                 placeholder={
                   tab === "glossary" || (tab === "cards" && cardDeck === "dictionary")
                     ? "חיפוש מונח בעברית, באנגלית או לפי נושא…"
-                    : "חיפוש שריר, עצם, origin, insertion, תנועה או איור…"
+                    : tab === "landmarks" || (tab === "cards" && cardDeck === "landmarks")
+                      ? "חיפוש חלק עצם: acromion, ASIS, זיז, גומה…"
+                      : "חיפוש שריר, עצם, origin, insertion, תנועה או איור…"
                 }
                 className="w-full rounded-xl border border-[var(--line)] bg-[var(--card)] py-2.5 pr-10 pl-3 text-sm outline-none ring-[var(--accent-2)] focus:ring-2"
               />
@@ -136,6 +144,12 @@ export function StudyApp() {
                   onClick={() => setCardDeck("dictionary")}
                 >
                   מילון שלד-שריר ({dictionaryTerms.length})
+                </FilterChip>
+                <FilterChip
+                  active={cardDeck === "landmarks"}
+                  onClick={() => setCardDeck("landmarks")}
+                >
+                  חלקי עצם ({examLandmarks.length})
                 </FilterChip>
               </div>
             )}
@@ -156,7 +170,8 @@ export function StudyApp() {
                         active={region === r.id}
                         onClick={() => setRegion(r.id)}
                       >
-                        {r.he} ({n})
+                        <span className="term font-bold">{r.en}</span>
+                        <span className="font-normal"> · {r.he}</span> ({n})
                       </FilterChip>
                     );
                   })}
@@ -216,6 +231,7 @@ export function StudyApp() {
           />
         )}
         {tab === "bones" && <BoneTable query={query} />}
+        {tab === "landmarks" && <LandmarksView query={query} />}
         {tab === "joints" && <JointsView />}
         {tab === "atlas" && <Atlas query={query} />}
         {tab === "planes" && <PlanesView />}
@@ -227,7 +243,7 @@ export function StudyApp() {
         {tab === "quiz" && <Quiz />}
       </main>
       <footer className="border-t border-[var(--line)] px-4 py-4 text-center text-[11px] text-[var(--ink-soft)]">
-        האיורים מתוך ויקיפדיה וויקישיתוף (Gray&apos;s Anatomy, BodyParts3D ועוד) — לשימוש לימודי.
+        איורי הגף התחתון מתוך מצגת הקורס; יתר האיורים מוויקיפדיה וויקישיתוף (Gray&apos;s Anatomy, BodyParts3D) — לשימוש לימודי.
       </footer>
     </div>
   );

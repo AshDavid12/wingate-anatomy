@@ -70,9 +70,9 @@ export function Glossary({ query }: { query: string }) {
               <table className="w-full text-sm">
                 <thead className="bg-[var(--paper-2)] text-xs text-[var(--ink-soft)]">
                   <tr>
-                    <th className="px-4 py-2 text-right font-semibold">מונח</th>
+                    <th className="px-4 py-2 text-right font-semibold">English</th>
                     <th className="hidden px-4 py-2 text-right font-semibold sm:table-cell">
-                      English
+                      עברית
                     </th>
                     <th className="px-4 py-2 text-right font-semibold">הגדרה</th>
                   </tr>
@@ -83,16 +83,16 @@ export function Glossary({ query }: { query: string }) {
                       key={t.id}
                       className="border-t border-[var(--line)] align-top even:bg-[var(--paper)]/50"
                     >
-                      <td className="px-4 py-2.5 font-medium">
-                        {t.he}
+                      <td className="px-4 py-2.5">
+                        <p className="term font-bold">{t.en ?? t.he}</p>
                         {t.en && (
-                          <p className="term mt-0.5 text-xs font-normal text-[var(--ink-soft)] sm:hidden">
-                            {t.en}
+                          <p className="mt-0.5 text-xs font-normal text-[var(--ink-soft)] sm:hidden">
+                            {t.he}
                           </p>
                         )}
                       </td>
-                      <td className="term hidden px-4 py-2.5 text-[var(--ink-soft)] sm:table-cell">
-                        {t.en ?? "—"}
+                      <td className="hidden px-4 py-2.5 text-[var(--ink-soft)] sm:table-cell">
+                        {t.en ? t.he : "—"}
                       </td>
                       <td className="px-4 py-2.5 leading-relaxed text-[var(--ink-soft)]">
                         <span className={cn(hideDef && "hide-study")}>{t.definition}</span>
@@ -127,16 +127,16 @@ export function Glossary({ query }: { query: string }) {
           <table className="w-full text-sm">
             <thead className="bg-[var(--paper-2)] text-xs text-[var(--ink-soft)]">
               <tr>
-                <th className="px-4 py-2 text-right">עברית</th>
                 <th className="px-4 py-2 text-right">English</th>
+                <th className="px-4 py-2 text-right">עברית</th>
                 <th className="px-4 py-2 text-right">הסבר</th>
               </tr>
             </thead>
             <tbody>
               {movementTerms.map((t) => (
                 <tr key={t.en} className="border-t border-[var(--line)] even:bg-[var(--paper)]/50">
-                  <td className="px-4 py-2 font-medium">{t.he}</td>
-                  <td className="term px-4 py-2">{t.en}</td>
+                  <td className="term px-4 py-2 font-bold">{t.en}</td>
+                  <td className="px-4 py-2 text-[var(--ink-soft)]">{t.he}</td>
                   <td className="px-4 py-2 text-[var(--ink-soft)]">{t.note}</td>
                 </tr>
               ))}
@@ -153,8 +153,8 @@ export function Glossary({ query }: { query: string }) {
               key={t.en}
               className="rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 py-3"
             >
-              <p className="term text-xs text-[var(--ink-soft)]">{t.en}</p>
-              <p className="font-semibold">{t.he}</p>
+              <p className="term font-bold">{t.en}</p>
+              <p className="text-sm text-[var(--ink-soft)]">{t.he}</p>
             </div>
           ))}
         </div>

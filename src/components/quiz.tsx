@@ -4,11 +4,23 @@ import { useEffect, useState } from "react";
 import { muscles } from "@/data/muscles";
 import { anatomyImage } from "@/data/anatomy-images";
 import { dictionaryTerms } from "@/data/dictionary";
+import { examLandmarks, type Landmark } from "@/data/landmarks";
+import { bilingual } from "@/components/name-pair";
 import { AnatomyThumb } from "@/components/anatomy-image";
 import { ACTIONS, FAMILIES, PLANES, planeById } from "@/data/planes";
 import { cn } from "@/lib/utils";
 
-type Kind = "origin" | "insertion" | "action" | "name" | "picture" | "plane" | "family" | "term";
+type Kind =
+  | "origin"
+  | "insertion"
+  | "action"
+  | "name"
+  | "picture"
+  | "plane"
+  | "family"
+  | "term"
+  | "landmark"
+  | "landmark-pic";
 
 type Question = {
   muscleId: string;
@@ -16,6 +28,7 @@ type Question = {
   kind: Kind;
   answer: string;
   options: string[];
+  landmarkId?: string;
 };
 
 function shuffle<T>(arr: T[]): T[] {
@@ -28,8 +41,56 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function pickKind(): Kind {
-  const kinds: Kind[] = ["origin", "insertion", "action", "name", "picture", "plane", "family", "term"];
+  const kinds: Kind[] = [
+    "origin",
+    "insertion",
+    "action",
+    "name",
+    "picture",
+    "plane",
+    "family",
+    "term",
+    "landmark",
+    "landmark-pic",
+  ];
   return kinds[Math.floor(Math.random() * kinds.length)];
+}
+
+function landmarkLabel(l: Landmark) {
+  return bilingual(l.nameEn, l.nameHe);
+}
+
+function landmarkDistractors(item: Landmark) {
+  const same = examLandmarks.filter((x) => x.id !== item.id && x.region === item.region);
+  const rest = examLandmarks.filter((x) => x.id !== item.id && x.region !== item.region);
+  return shuffle([...same, ...rest]).slice(0, 3);
+}
+
+function buildLandmarkQuestion(withPicture: boolean): Question {
+  const pictured = examLandmarks.filter(
+    (l) => anatomyImage("landmarks", l.id) || anatomyImage("bones", l.boneId),
+  );
+  const pool = withPicture ? pictured : examLandmarks;
+  const item = pool[Math.floor(Math.random() * pool.length)] ?? examLandmarks[0]!;
+  const others = landmarkDistractors(item);
+  if (withPicture) {
+    return {
+      muscleId: item.boneId,
+      landmarkId: item.id,
+      kind: "landmark-pic",
+      prompt: "איזה חלק עצם מסומן באיור?",
+      answer: landmarkLabel(item),
+      options: shuffle([item, ...others].map(landmarkLabel)),
+    };
+  }
+  return {
+    muscleId: item.boneId,
+    landmarkId: item.id,
+    kind: "landmark",
+    prompt: `איפה נמצא ${landmarkLabel(item)}?`,
+    answer: item.locationHe,
+    options: shuffle([item.locationHe, ...others.map((x) => x.locationHe)]),
+  };
 }
 
 function buildQuestion(pool = muscles.filter((m) => m.core)): Question {
@@ -44,14 +105,18 @@ function buildQuestion(pool = muscles.filter((m) => m.core)): Question {
     return {
       muscleId: "trapezius",
       kind: "plane",
-      prompt: `באיזה מישור מתבצעת ${a.he} (${a.en})?`,
-      answer: `${p.he} · ${p.en}`,
-      options: shuffle(PLANES.map((x) => `${x.he} · ${x.en}`)),
+      prompt: `באיזה מישור מתבצעת ${bilingual(a.en, a.he)}?`,
+      answer: bilingual(p.en, p.he),
+      options: shuffle(PLANES.map((x) => bilingual(x.en, x.he))),
     };
   }
 
   if (kind === "term") {
     return buildTermQuestion();
+  }
+
+  if (kind === "landmark" || kind === "landmark-pic") {
+    return buildLandmarkQuestion(kind === "landmark-pic");
   }
 
   if (kind === "family") {
@@ -62,10 +127,13 @@ function buildQuestion(pool = muscles.filter((m) => m.core)): Question {
       kind: "family",
       prompt: `לאיזו קבוצה שייכים ${f.members
         .slice(0, 2)
-        .map((id) => muscles.find((m) => m.id === id)?.nameHe ?? id)
-        .join(" ו-")}?`,
-      answer: `${f.he} (${f.en})`,
-      options: shuffle([f, ...others].map((x) => `${x.he} (${x.en})`)),
+        .map((id) => {
+          const m = muscles.find((x) => x.id === id);
+          return m ? bilingual(m.nameEn, m.nameHe) : id;
+        })
+        .join(" / ")}?`,
+      answer: bilingual(f.en, f.he),
+      options: shuffle([f, ...others].map((x) => bilingual(x.en, x.he))),
     };
   }
 
@@ -83,8 +151,8 @@ function buildQuestion(pool = muscles.filter((m) => m.core)): Question {
   const others = shuffle(pool.filter((m) => m.id !== muscle.id)).slice(0, 3);
 
   if (kind === "name" || kind === "picture") {
-    const answer = muscle.nameHe;
-    const options = shuffle([answer, ...others.map((m) => m.nameHe)]);
+    const answer = bilingual(muscle.nameEn, muscle.nameHe);
+    const options = shuffle([answer, ...others.map((m) => bilingual(m.nameEn, m.nameHe))]);
     return {
       muscleId: muscle.id,
       kind,
@@ -111,14 +179,14 @@ function buildQuestion(pool = muscles.filter((m) => m.core)): Question {
   return {
     muscleId: muscle.id,
     kind,
-    prompt: `מה ה־${field.label} של ${muscle.nameHe} (${muscle.nameEn})?`,
+    prompt: `מה ה־${field.label} של ${bilingual(muscle.nameEn, muscle.nameHe)}?`,
     answer: field.he,
     options: shuffle([field.he, ...distractors]),
   };
 }
 
 function termLabel(t: (typeof dictionaryTerms)[number]) {
-  return t.en ? `${t.he} · ${t.en}` : t.he;
+  return bilingual(t.en, t.he);
 }
 
 function buildTermQuestion(): Question {
@@ -135,7 +203,7 @@ function buildTermQuestion(): Question {
     return {
       muscleId: "trapezius",
       kind: "term",
-      prompt: `מה ההגדרה של ${term.he}?`,
+      prompt: `מה ההגדרה של ${termLabel(term)}?`,
       answer: term.definition,
       options: [term.definition],
     };
@@ -201,7 +269,7 @@ export function Quiz() {
           ציון: <span className="font-bold text-[var(--ink)]">{score.ok}</span> / {score.n}
           {score.n > 0 && <span> ({pct}%)</span>}
         </p>
-        <p className="text-xs text-[var(--ink-soft)]">שאלות בסגנון מבחן · Origin / מישורים / מילון</p>
+        <p className="text-xs text-[var(--ink-soft)]">שאלות בסגנון מבחן · Origin / חלקי עצם / מילון</p>
       </div>
 
       <div className="rounded-3xl border border-[var(--line)] bg-[var(--card)] p-5 shadow-sm md:p-7">
@@ -209,17 +277,8 @@ export function Quiz() {
           {q.kind}
         </p>
         <h2 className="mt-2 text-lg font-bold leading-snug md:text-xl">{q.prompt}</h2>
-        {q.kind === "picture" && (
-          <div className="mt-4 overflow-hidden rounded-xl border border-[var(--line)] bg-white">
-            <AnatomyThumb
-              kind="muscles"
-              id={q.muscleId}
-              alt="איור שריר"
-              size="hero"
-              className="mx-auto rounded-none border-0"
-              interactive={false}
-            />
-          </div>
+        {(q.kind === "picture" || q.kind === "landmark-pic") && (
+          <QuizPicture q={q} />
         )}
         <div className="mt-5 grid gap-2">
           {q.options.map((opt) => {
@@ -258,6 +317,23 @@ export function Quiz() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function QuizPicture({ q }: { q: Question }) {
+  const isLandmark = q.kind === "landmark-pic";
+  const useLandmarkImg = Boolean(isLandmark && q.landmarkId && anatomyImage("landmarks", q.landmarkId));
+  return (
+    <div className="mt-4 overflow-hidden rounded-xl border border-[var(--line)] bg-white">
+      <AnatomyThumb
+        kind={isLandmark ? (useLandmarkImg ? "landmarks" : "bones") : "muscles"}
+        id={useLandmarkImg ? q.landmarkId! : q.muscleId}
+        alt={isLandmark ? "חלק עצם" : "איור שריר"}
+        size="hero"
+        className="mx-auto rounded-none border-0"
+        interactive={false}
+      />
     </div>
   );
 }

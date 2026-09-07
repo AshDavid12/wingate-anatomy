@@ -3,6 +3,8 @@ export type AnatomyImageMeta = {
   wikiTitle: string;
   wikiPage: string;
   file: string;
+  source?: "wiki" | "course";
+  extras?: { src: string; label: string }[];
 };
 
 export const ANATOMY_IMAGES: Record<string, AnatomyImageMeta> = {
@@ -707,10 +709,472 @@ export const ANATOMY_IMAGES: Record<string, AnatomyImageMeta> = {
     "wikiTitle": "Human leg",
     "wikiPage": "Human leg",
     "file": ""
+  },
+  "landmarks/foramen-magnum": {
+    "src": "/anatomy/landmarks/foramen-magnum.png",
+    "wikiTitle": "Foramen magnum - inferior view.png",
+    "wikiPage": "Foramen magnum",
+    "file": "Foramen magnum - inferior view.png"
+  },
+  "landmarks/vertebral-body": {
+    "src": "/anatomy/landmarks/vertebral-body.png",
+    "wikiTitle": "Gray90.png",
+    "wikiPage": "Vertebra",
+    "file": "Gray90.png"
+  },
+  "landmarks/vertebral-foramen": {
+    "src": "/anatomy/landmarks/vertebral-foramen.png",
+    "wikiTitle": "Gray90.png",
+    "wikiPage": "Vertebral foramen",
+    "file": "Gray90.png"
+  },
+  "landmarks/transverse-process": {
+    "src": "/anatomy/landmarks/transverse-process.png",
+    "wikiTitle": "Gray90.png",
+    "wikiPage": "Transverse process",
+    "file": "Gray90.png"
+  },
+  "landmarks/spinous-process": {
+    "src": "/anatomy/landmarks/spinous-process.png",
+    "wikiTitle": "Lumbar vertebra 1 posterior2.png",
+    "wikiPage": "Spinous process",
+    "file": "Lumbar vertebra 1 posterior2.png"
+  },
+  "landmarks/intervertebral-foramen": {
+    "src": "/anatomy/landmarks/intervertebral-foramen.png",
+    "wikiTitle": "Gray94.png",
+    "wikiPage": "Intervertebral foramen",
+    "file": "Gray94.png"
+  },
+  "landmarks/superior-articular-process": {
+    "src": "/anatomy/landmarks/superior-articular-process.png",
+    "wikiTitle": "Superior articular process of sacrum 01 posterior view.png",
+    "wikiPage": "Articular process",
+    "file": "Superior articular process of sacrum 01 posterior view.png"
+  },
+  "landmarks/inferior-articular-process": {
+    "src": "/anatomy/landmarks/inferior-articular-process.png",
+    "wikiTitle": "Gray90.png",
+    "wikiPage": "Articular process",
+    "file": "Gray90.png"
+  },
+  "landmarks/cervical-transverse-foramen": {
+    "src": "/anatomy/landmarks/cervical-transverse-foramen.png",
+    "wikiTitle": "Cervical vertebra english.png",
+    "wikiPage": "Transverse foramen",
+    "file": "Cervical vertebra english.png"
+  },
+  "landmarks/atlas": {
+    "src": "/anatomy/landmarks/atlas.png",
+    "wikiTitle": "Gray86.png",
+    "wikiPage": "Atlas (anatomy)",
+    "file": "Gray86.png"
+  },
+  "landmarks/axis-dens": {
+    "src": "/anatomy/landmarks/axis-dens.png",
+    "wikiTitle": "Gray87.png",
+    "wikiPage": "Axis (anatomy)",
+    "file": "Gray87.png"
+  },
+  "landmarks/cervical-features": {
+    "src": "/anatomy/landmarks/cervical-features.png",
+    "wikiTitle": "Cervical vertebra english.png",
+    "wikiPage": "Cervical vertebrae",
+    "file": "Cervical vertebra english.png"
+  },
+  "landmarks/thoracic-costal-facet": {
+    "src": "/anatomy/landmarks/thoracic-costal-facet.png",
+    "wikiTitle": "Gray91.png",
+    "wikiPage": "Thoracic vertebrae",
+    "file": "Gray91.png"
+  },
+  "landmarks/lumbar-features": {
+    "src": "/anatomy/landmarks/lumbar-features.png",
+    "wikiTitle": "Lumbar vertebra 1 lateral2.png",
+    "wikiPage": "Lumbar vertebrae",
+    "file": "Lumbar vertebra 1 lateral2.png"
+  },
+  "landmarks/sacrum-overview": {
+    "src": "/anatomy/landmarks/sacrum-overview.png",
+    "wikiTitle": "Sacrum - posterior view02.png",
+    "wikiPage": "Sacrum",
+    "file": "Sacrum - posterior view02.png"
+  },
+  "landmarks/annulus-fibrosus": {
+    "src": "/anatomy/landmarks/annulus-fibrosus.png",
+    "wikiTitle": "Annulus Fibrosus.png",
+    "wikiPage": "Annulus fibrosus",
+    "file": "Annulus Fibrosus.png"
+  },
+  "landmarks/nucleus-pulposus": {
+    "src": "/anatomy/landmarks/nucleus-pulposus.png",
+    "wikiTitle": "Intervertebral disc",
+    "wikiPage": "Nucleus pulposus",
+    "file": "716_Intervertebral_Disk.svg"
+  },
+  "landmarks/manubrium": {
+    "src": "/anatomy/landmarks/manubrium.png",
+    "wikiTitle": "Gray117.png",
+    "wikiPage": "Sternum",
+    "file": "Gray117.png"
+  },
+  "landmarks/sternal-body": {
+    "src": "/anatomy/landmarks/sternal-body.png",
+    "wikiTitle": "Body of sternum frontal2.png",
+    "wikiPage": "Sternum",
+    "file": "Body of sternum frontal2.png"
+  },
+  "landmarks/xiphoid": {
+    "src": "/anatomy/landmarks/xiphoid.png",
+    "wikiTitle": "Xiphoid process frontal2.png",
+    "wikiPage": "Xiphoid process",
+    "file": "Xiphoid process frontal2.png"
+  },
+  "landmarks/true-ribs": {
+    "src": "/anatomy/landmarks/true-ribs.png",
+    "wikiTitle": "True ribs frontal2.png",
+    "wikiPage": "Rib cage",
+    "file": "True ribs frontal2.png"
+  },
+  "landmarks/false-ribs": {
+    "src": "/anatomy/landmarks/false-ribs.png",
+    "wikiTitle": "False ribs back2.png",
+    "wikiPage": "Rib cage",
+    "file": "False ribs back2.png"
+  },
+  "landmarks/floating-ribs": {
+    "src": "/anatomy/landmarks/floating-ribs.png",
+    "wikiTitle": "Floating ribs back2.png",
+    "wikiPage": "Rib cage",
+    "file": "Floating ribs back2.png"
+  },
+  "landmarks/clavicle-sternal": {
+    "src": "/anatomy/landmarks/clavicle-sternal.png",
+    "wikiTitle": "Gray200.png",
+    "wikiPage": "Clavicle",
+    "file": "Gray200.png"
+  },
+  "landmarks/clavicle-acromial": {
+    "src": "/anatomy/landmarks/clavicle-acromial.png",
+    "wikiTitle": "Gray200.png",
+    "wikiPage": "Clavicle",
+    "file": "Gray200.png"
+  },
+  "landmarks/scapula-medial-border": {
+    "src": "/anatomy/landmarks/scapula-medial-border.png",
+    "wikiTitle": "Medial border of scapula02.png",
+    "wikiPage": "Scapula",
+    "file": "Medial border of scapula02.png"
+  },
+  "landmarks/scapula-lateral-border": {
+    "src": "/anatomy/landmarks/scapula-lateral-border.png",
+    "wikiTitle": "Lateral border of scapula01.png",
+    "wikiPage": "Scapula",
+    "file": "Lateral border of scapula01.png"
+  },
+  "landmarks/scapula-inferior-angle": {
+    "src": "/anatomy/landmarks/scapula-inferior-angle.png",
+    "wikiTitle": "Inferior angle of the scapula01.png",
+    "wikiPage": "Scapula",
+    "file": "Inferior angle of the scapula01.png"
+  },
+  "landmarks/scapula-superior-angle": {
+    "src": "/anatomy/landmarks/scapula-superior-angle.png",
+    "wikiTitle": "Superior angle of scapula02.png",
+    "wikiPage": "Scapula",
+    "file": "Superior angle of scapula02.png"
+  },
+  "landmarks/spine-of-scapula": {
+    "src": "/anatomy/landmarks/spine-of-scapula.png",
+    "wikiTitle": "Spine of scapula02.png",
+    "wikiPage": "Spine of scapula",
+    "file": "Spine of scapula02.png"
+  },
+  "landmarks/acromion": {
+    "src": "/anatomy/landmarks/acromion.png",
+    "wikiTitle": "Acromion of scapula02.png",
+    "wikiPage": "Acromion",
+    "file": "Acromion of scapula02.png"
+  },
+  "landmarks/supraspinous-fossa": {
+    "src": "/anatomy/landmarks/supraspinous-fossa.png",
+    "wikiTitle": "Supraspinous fossa of scapula01.png",
+    "wikiPage": "Supraspinatous fossa",
+    "file": "Supraspinous fossa of scapula01.png"
+  },
+  "landmarks/infraspinous-fossa": {
+    "src": "/anatomy/landmarks/infraspinous-fossa.png",
+    "wikiTitle": "Infraspinatous fossa of scapula02.png",
+    "wikiPage": "Infraspinatous fossa",
+    "file": "Infraspinatous fossa of scapula02.png"
+  },
+  "landmarks/subscapular-fossa": {
+    "src": "/anatomy/landmarks/subscapular-fossa.png",
+    "wikiTitle": "Subscapular fossa02.png",
+    "wikiPage": "Subscapular fossa",
+    "file": "Subscapular fossa02.png"
+  },
+  "landmarks/coracoid": {
+    "src": "/anatomy/landmarks/coracoid.png",
+    "wikiTitle": "Coracoid process of scapula02.png",
+    "wikiPage": "Coracoid process",
+    "file": "Coracoid process of scapula02.png"
+  },
+  "landmarks/glenoid": {
+    "src": "/anatomy/landmarks/glenoid.png",
+    "wikiTitle": "Glenoid cavity of scapula02.png",
+    "wikiPage": "Glenoid cavity",
+    "file": "Glenoid cavity of scapula02.png"
+  },
+  "landmarks/glenoid-labrum": {
+    "src": "/anatomy/landmarks/glenoid-labrum.png",
+    "wikiTitle": "Gray327.png",
+    "wikiPage": "Glenoid labrum",
+    "file": "Gray327.png"
+  },
+  "landmarks/head-of-humerus": {
+    "src": "/anatomy/landmarks/head-of-humerus.png",
+    "wikiTitle": "Gray207.png",
+    "wikiPage": "Humerus",
+    "file": "Gray207.png"
+  },
+  "landmarks/greater-tubercle": {
+    "src": "/anatomy/landmarks/greater-tubercle.png",
+    "wikiTitle": "Gray207.png",
+    "wikiPage": "Greater tubercle",
+    "file": "Gray207.png"
+  },
+  "landmarks/lesser-tubercle": {
+    "src": "/anatomy/landmarks/lesser-tubercle.jpg",
+    "wikiTitle": "Lesser tubercle",
+    "wikiPage": "Lesser tubercle",
+    "file": "Lesser-Tubercle-of-Right-Humerus.jpg"
+  },
+  "landmarks/bicipital-groove": {
+    "src": "/anatomy/landmarks/bicipital-groove.png",
+    "wikiTitle": "Gray207.png",
+    "wikiPage": "Intertubercular sulcus",
+    "file": "Gray207.png"
+  },
+  "landmarks/deltoid-tuberosity": {
+    "src": "/anatomy/landmarks/deltoid-tuberosity.png",
+    "wikiTitle": "Gray207.png",
+    "wikiPage": "Deltoid tuberosity",
+    "file": "Gray207.png"
+  },
+  "landmarks/medial-epicondyle-humerus": {
+    "src": "/anatomy/landmarks/medial-epicondyle-humerus.png",
+    "wikiTitle": "Gray210.png",
+    "wikiPage": "Medial epicondyle of the humerus",
+    "file": "Gray210.png"
+  },
+  "landmarks/lateral-epicondyle-humerus": {
+    "src": "/anatomy/landmarks/lateral-epicondyle-humerus.png",
+    "wikiTitle": "Gray210.png",
+    "wikiPage": "Lateral epicondyle of the humerus",
+    "file": "Gray210.png"
+  },
+  "landmarks/olecranon-fossa": {
+    "src": "/anatomy/landmarks/olecranon-fossa.png",
+    "wikiTitle": "Gray208.png",
+    "wikiPage": "Olecranon fossa",
+    "file": "Gray208.png"
+  },
+  "landmarks/head-of-radius": {
+    "src": "/anatomy/landmarks/head-of-radius.png",
+    "wikiTitle": "Gray213.png",
+    "wikiPage": "Radius (bone)",
+    "file": "Gray213.png"
+  },
+  "landmarks/neck-of-radius": {
+    "src": "/anatomy/landmarks/neck-of-radius.png",
+    "wikiTitle": "Gray213.png",
+    "wikiPage": "Radius (bone)",
+    "file": "Gray213.png"
+  },
+  "landmarks/radial-tuberosity": {
+    "src": "/anatomy/landmarks/radial-tuberosity.png",
+    "wikiTitle": "Radial tuberosity",
+    "wikiPage": "Radial tuberosity",
+    "file": "Tuberositasradii.png"
+  },
+  "landmarks/olecranon": {
+    "src": "/anatomy/landmarks/olecranon.png",
+    "wikiTitle": "Gray212.png",
+    "wikiPage": "Olecranon",
+    "file": "Gray212.png"
+  },
+  "landmarks/ulnar-tuberosity": {
+    "src": "/anatomy/landmarks/ulnar-tuberosity.png",
+    "wikiTitle": "Gray212.png",
+    "wikiPage": "Ulna",
+    "file": "Gray212.png"
+  },
+  "landmarks/radial-styloid": {
+    "src": "/anatomy/landmarks/radial-styloid.png",
+    "wikiTitle": "Gray219.png",
+    "wikiPage": "Styloid process of radius",
+    "file": "Gray219.png"
+  },
+  "landmarks/ulnar-styloid": {
+    "src": "/anatomy/landmarks/ulnar-styloid.png",
+    "wikiTitle": "Gray219.png",
+    "wikiPage": "Ulnar styloid process",
+    "file": "Gray219.png"
+  },
+  "landmarks/iliac-fossa": {
+    "src": "/anatomy/landmarks/iliac-fossa.png",
+    "wikiTitle": "Iliac fossa 01 anterior view.png",
+    "wikiPage": "Iliac fossa",
+    "file": "Iliac fossa 01 anterior view.png"
+  },
+  "landmarks/gluteal-fossa": {
+    "src": "/anatomy/landmarks/gluteal-fossa.png",
+    "wikiTitle": "Gray237.png",
+    "wikiPage": "Ilium (bone)",
+    "file": "Gray237.png"
+  },
+  "landmarks/iliac-crest": {
+    "src": "/anatomy/landmarks/iliac-crest.png",
+    "wikiTitle": "Iliac crest 03 - lateral view.png",
+    "wikiPage": "Iliac crest",
+    "file": "Iliac crest 03 - lateral view.png"
+  },
+  "landmarks/asis": {
+    "src": "/anatomy/landmarks/asis.png",
+    "wikiTitle": "Gray236.png",
+    "wikiPage": "Anterior superior iliac spine",
+    "file": "Gray236.png"
+  },
+  "landmarks/psis": {
+    "src": "/anatomy/landmarks/psis.png",
+    "wikiTitle": "Gray237.png",
+    "wikiPage": "Posterior superior iliac spine",
+    "file": "Gray237.png"
+  },
+  "landmarks/ischial-tuberosity": {
+    "src": "/anatomy/landmarks/ischial-tuberosity.png",
+    "wikiTitle": "Ischial tuberosity 01 posterior view.png",
+    "wikiPage": "Ischial tuberosity",
+    "file": "Ischial tuberosity 01 posterior view.png"
+  },
+  "landmarks/superior-pubic-ramus": {
+    "src": "/anatomy/landmarks/superior-pubic-ramus.png",
+    "wikiTitle": "Gray241.png",
+    "wikiPage": "Superior pubic ramus",
+    "file": "Gray241.png"
+  },
+  "landmarks/inferior-pubic-ramus": {
+    "src": "/anatomy/landmarks/inferior-pubic-ramus.png",
+    "wikiTitle": "Gray241.png",
+    "wikiPage": "Inferior pubic ramus",
+    "file": "Gray241.png"
+  },
+  "landmarks/pubic-symphysis": {
+    "src": "/anatomy/landmarks/pubic-symphysis.png",
+    "wikiTitle": "Gray321.png",
+    "wikiPage": "Pubic symphysis",
+    "file": "Gray321.png"
+  },
+  "landmarks/acetabulum": {
+    "src": "/anatomy/landmarks/acetabulum.png",
+    "wikiTitle": "Acetabulum 04 lateral view (Right hip bone).png",
+    "wikiPage": "Acetabulum",
+    "file": "Acetabulum 04 lateral view (Right hip bone).png"
+  },
+  "landmarks/sacroiliac-joint": {
+    "src": "/anatomy/landmarks/sacroiliac-joint.png",
+    "wikiTitle": "Gray237.png",
+    "wikiPage": "Sacroiliac joint",
+    "file": "Gray237.png"
+  },
+  "landmarks/head-of-femur": {
+    "src": "/anatomy/landmarks/head-of-femur.png",
+    "wikiTitle": "Gray244.png",
+    "wikiPage": "Femur",
+    "file": "Gray244.png"
+  },
+  "landmarks/greater-trochanter": {
+    "src": "/anatomy/landmarks/greater-trochanter.png",
+    "wikiTitle": "Gray244.png",
+    "wikiPage": "Greater trochanter",
+    "file": "Gray244.png"
+  },
+  "landmarks/lesser-trochanter": {
+    "src": "/anatomy/landmarks/lesser-trochanter.png",
+    "wikiTitle": "Gray244.png",
+    "wikiPage": "Lesser trochanter",
+    "file": "Gray244.png"
+  },
+  "landmarks/medial-condyle-femur": {
+    "src": "/anatomy/landmarks/medial-condyle-femur.png",
+    "wikiTitle": "Gray246.png",
+    "wikiPage": "Medial condyle of femur",
+    "file": "Gray246.png"
+  },
+  "landmarks/lateral-condyle-femur": {
+    "src": "/anatomy/landmarks/lateral-condyle-femur.png",
+    "wikiTitle": "Gray246.png",
+    "wikiPage": "Lateral condyle of femur",
+    "file": "Gray246.png"
+  },
+  "landmarks/patellar-surface": {
+    "src": "/anatomy/landmarks/patellar-surface.png",
+    "wikiTitle": "Gray246.png",
+    "wikiPage": "Femur",
+    "file": "Gray246.png"
+  },
+  "landmarks/medial-condyle-tibia": {
+    "src": "/anatomy/landmarks/medial-condyle-tibia.png",
+    "wikiTitle": "Gray258.png",
+    "wikiPage": "Tibia",
+    "file": "Gray258.png"
+  },
+  "landmarks/lateral-condyle-tibia": {
+    "src": "/anatomy/landmarks/lateral-condyle-tibia.png",
+    "wikiTitle": "Gray258.png",
+    "wikiPage": "Tibia",
+    "file": "Gray258.png"
+  },
+  "landmarks/tibial-plateau": {
+    "src": "/anatomy/landmarks/tibial-plateau.png",
+    "wikiTitle": "Gray258.png",
+    "wikiPage": "Tibia",
+    "file": "Gray258.png"
+  },
+  "landmarks/tibial-tuberosity": {
+    "src": "/anatomy/landmarks/tibial-tuberosity.png",
+    "wikiTitle": "Gray258.png",
+    "wikiPage": "Tibial tuberosity",
+    "file": "Gray258.png"
+  },
+  "landmarks/medial-malleolus": {
+    "src": "/anatomy/landmarks/medial-malleolus.png",
+    "wikiTitle": "Gray258.png",
+    "wikiPage": "Malleolus",
+    "file": "Gray258.png"
+  },
+  "landmarks/head-of-fibula": {
+    "src": "/anatomy/landmarks/head-of-fibula.png",
+    "wikiTitle": "Gray259.png",
+    "wikiPage": "Fibula",
+    "file": "Gray259.png"
+  },
+  "landmarks/lateral-malleolus": {
+    "src": "/anatomy/landmarks/lateral-malleolus.png",
+    "wikiTitle": "Gray259.png",
+    "wikiPage": "Malleolus",
+    "file": "Gray259.png"
+  },
+  "landmarks/linea-aspera": {
+    "src": "/anatomy/landmarks/linea-aspera.png",
+    "wikiTitle": "Gray245.png",
+    "wikiPage": "Gray245.png",
+    "file": "Gray245.png"
   }
 };
 
-export type AnatomyKind = "muscles" | "bones" | "joints" | "regions";
+export type AnatomyKind = "muscles" | "bones" | "joints" | "regions" | "landmarks";
 
 export function anatomyImage(kind: AnatomyKind, id: string): AnatomyImageMeta | undefined {
   return ANATOMY_IMAGES[`${kind}/${id}`];

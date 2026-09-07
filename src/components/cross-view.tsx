@@ -18,6 +18,7 @@ import {
 import { musclesForBone } from "@/data/lookups";
 import { AnatomyThumb } from "@/components/anatomy-image";
 import { PlaneBadge } from "@/components/planes-view";
+import { bilingual, NamePair } from "@/components/name-pair";
 import { cn } from "@/lib/utils";
 import type { Muscle } from "@/data/types";
 
@@ -74,7 +75,7 @@ export function CrossView() {
           <ChipRow
             items={ACTIONS.filter((a) => a.plane).map((a) => ({
               id: a.id,
-              label: `${a.he} · ${a.en}`,
+              label: bilingual(a.en, a.he),
             }))}
             value={action}
             onChange={(id) => setAction(id as ActionId)}
@@ -98,7 +99,8 @@ export function CrossView() {
                     : "border-[var(--line)] bg-[var(--card)]",
                 )}
               >
-                {j.he}
+                <span className="term font-bold">{j.en}</span>
+                <span className="mt-0.5 block text-[10px] font-normal opacity-80">{j.he}</span>
               </button>
             ))}
           </div>
@@ -117,7 +119,7 @@ export function CrossView() {
           <ChipRow
             items={bones
               .filter((b) => !q || `${b.nameHe} ${b.nameEn}`.toLowerCase().includes(q.toLowerCase()))
-              .map((b) => ({ id: b.id, label: b.nameHe }))}
+              .map((b) => ({ id: b.id, label: bilingual(b.nameEn, b.nameHe) }))}
             value={bone}
             onChange={setBone}
           />
@@ -128,7 +130,7 @@ export function CrossView() {
       {mode === "plane" && (
         <>
           <ChipRow
-            items={PLANES.map((p) => ({ id: p.id, label: p.he }))}
+            items={PLANES.map((p) => ({ id: p.id, label: bilingual(p.en, p.he) }))}
             value={plane}
             onChange={(id) => setPlane(id as PlaneId)}
           />
@@ -145,7 +147,7 @@ export function CrossView() {
           >
             {muscles.map((m) => (
               <option key={m.id} value={m.id}>
-                {m.nameHe} · {m.nameEn}
+                {bilingual(m.nameEn, m.nameHe)}
               </option>
             ))}
           </select>
@@ -192,8 +194,7 @@ function MuscleRow({ m, extra }: { m: Muscle; extra?: string }) {
     <div className="flex items-start gap-3 rounded-xl border border-[var(--line)] bg-[var(--card)] p-3">
       <AnatomyThumb kind="muscles" id={m.id} alt={m.nameHe} size="sm" interactive={false} />
       <div className="min-w-0 flex-1">
-        <p className="font-bold">{m.nameHe}</p>
-        <p className="term text-xs text-[var(--ink-soft)]">{m.nameEn}</p>
+        <NamePair en={m.nameEn} he={m.nameHe} heClassName="text-xs" />
         {extra && <p className="mt-1 text-xs text-[var(--accent)]">{extra}</p>}
         <p className="mt-1 line-clamp-2 text-xs text-[var(--ink-soft)]">{m.actionHe}</p>
         <div className="mt-1 flex flex-wrap gap-1">
@@ -220,8 +221,8 @@ function ActionPanel({ action }: { action: ActionId }) {
     <div className="space-y-3">
       <div className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-lg font-bold">{meta.he}</h3>
-          <span className="term text-sm text-[var(--ink-soft)]">{meta.en}</span>
+          <h3 className="term text-lg font-bold">{meta.en}</h3>
+          <span className="text-sm text-[var(--ink-soft)]">{meta.he}</span>
           <PlaneBadge plane={meta.plane} />
         </div>
         <p className="mt-1 text-sm text-[var(--ink-soft)]">{meta.note}</p>
@@ -258,8 +259,8 @@ function JointPanel({ joint }: { joint: JointTag }) {
         <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--accent)]">
           מפרק נבחר
         </p>
-        <h3 className="text-lg font-bold">{meta?.he}</h3>
-        <p className="term text-sm text-[var(--ink-soft)]">{meta?.en}</p>
+        <h3 className="term text-lg font-bold">{meta?.en}</h3>
+        <p className="text-sm text-[var(--ink-soft)]">{meta?.he}</p>
         <p className="mt-1 text-sm">
           {list.length} שרירים שפועלים על מפרק זה
         </p>
@@ -281,7 +282,7 @@ function JointPanel({ joint }: { joint: JointTag }) {
         <div key={row.action}>
           <div className="mb-2 flex items-center gap-2">
             <h4 className="font-semibold">
-              {row.meta?.he} <span className="term text-sm font-normal">{row.meta?.en}</span>
+              <NamePair en={row.meta?.en} he={row.meta?.he} stacked={false} heClassName="text-sm" />
             </h4>
             <PlaneBadge plane={row.meta?.plane ?? null} />
             <span className="text-xs text-[var(--ink-soft)]">{row.muscles.length}</span>
@@ -306,8 +307,7 @@ function BonePanel({ boneId }: { boneId: string }) {
       <div className="flex items-start gap-3 rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4">
         <AnatomyThumb kind="bones" id={bone.id} alt={bone.nameHe} size="md" interactive={false} />
         <div>
-          <h3 className="text-lg font-bold">{bone.nameHe}</h3>
-          <p className="term text-sm text-[var(--ink-soft)]">{bone.nameEn}</p>
+          <NamePair en={bone.nameEn} he={bone.nameHe} enClassName="text-lg" heClassName="text-sm" />
           <ul className="mt-2 list-disc pr-4 text-xs text-[var(--ink-soft)]">
             {bone.movements.map((mv) => (
               <li key={mv}>{mv}</li>
@@ -340,13 +340,14 @@ function PlanePanel({ plane }: { plane: PlaneId }) {
   return (
     <div className="space-y-3">
       <div className={cn("rounded-2xl border p-4", p.bg)}>
-        <h3 className="text-lg font-bold">{p.he}</h3>
+        <h3 className="term text-lg font-bold">{p.en}</h3>
+        <p className="text-sm text-[var(--ink-soft)]">{p.he}</p>
         <p className="text-sm">{p.mnemonic}</p>
       </div>
       {acts.map((a) => (
         <div key={a.id}>
           <h4 className="mb-2 font-semibold">
-            {a.he} <span className="term text-sm font-normal">{a.en}</span>
+            <NamePair en={a.en} he={a.he} stacked={false} heClassName="text-sm" />
           </h4>
           <div className="grid gap-2 md:grid-cols-2">
             {musclesByAction(a.id).map((m) => (
@@ -371,20 +372,24 @@ function SimilarPanel({ muscleId }: { muscleId: string }) {
       <div className="flex items-start gap-3 rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4">
         <AnatomyThumb kind="muscles" id={m.id} alt={m.nameHe} size="md" interactive={false} />
         <div>
-          <h3 className="text-lg font-bold">{m.nameHe}</h3>
-          <p className="term text-sm">{m.nameEn}</p>
+          <NamePair en={m.nameEn} he={m.nameHe} enClassName="text-lg" heClassName="text-sm" />
           {family && <p className="mt-1 text-xs text-[var(--accent)]">{family.he}</p>}
           <div className="mt-2 flex flex-wrap gap-1">
             {tags.joints.map((j) => (
               <span key={j} className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[11px]">
-                {JOINT_TAGS.find((x) => x.id === j)?.he}
+                {(() => {
+                  const jt = JOINT_TAGS.find((x) => x.id === j);
+                  return jt ? bilingual(jt.en, jt.he) : j;
+                })()}
               </span>
             ))}
             {tags.actions.map((a) => {
               const meta = actionById(a);
               return (
                 <span key={a} className="inline-flex items-center gap-1">
-                  <span className="rounded-full bg-[var(--paper-2)] px-2 py-0.5 text-[11px]">{meta?.he}</span>
+                  <span className="rounded-full bg-[var(--paper-2)] px-2 py-0.5 text-[11px]">
+                    {bilingual(meta?.en, meta?.he)}
+                  </span>
                   <PlaneBadge plane={meta?.plane ?? null} />
                 </span>
               );

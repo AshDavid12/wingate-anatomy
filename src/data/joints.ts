@@ -74,31 +74,165 @@ export const joints: Joint[] = [
     nameHe: "מפרק הירך",
     nameEn: "Hip joint",
     bones: ["ilium", "ischium", "pubis", "femur"],
-    typeHe: "סינוביאלי כדורי",
-    typeEn: "Ball-and-socket synovial",
-    movements: ["Flexion / extension", "Abduction / adduction", "Internal / external rotation"],
-    notes: "ראש הירך ב-acetabulum. יציב יותר מהכתף.",
+    typeHe: "סינוביאלי כדורי, רב-צירי (ball & socket)",
+    typeEn: "Ball-and-socket synovial, multiaxial",
+    movements: [
+      "Flexion / extension",
+      "Abduction / adduction",
+      "Internal / external rotation",
+      "כל התנועות בכל המישורים",
+    ],
+    notes: "Femur (head) + Coxa (acetabulum). יציב יותר מהכתף.",
+    details: [
+      {
+        title: "עצמות המשתתפות",
+        items: ["Femur — ראש הירך (head)", "Coxa — acetabulum של עצם האגן"],
+      },
+      {
+        title: "יציבות המפרק",
+        items: [
+          "מפרק יציב מאוד, בעל התאמה מבנית",
+          "קפסולה הדוקה",
+          "Labrum התורם ליציבות",
+          "מגוון רצועות מייצבות ומגוון שרירים מייצבים",
+        ],
+      },
+      {
+        title: "רצועות המפרק",
+        items: [
+          "Iliofemoral — קדמית, מ-AIIS אל הירך (Y)",
+          "Pubofemoral — מהחיק אל הירך",
+          "Ischiofemoral — אחורית, מה-ischium אל הטרוכנטר הגדול",
+        ],
+      },
+      {
+        title: "שרירים מניעים (מהמצגת)",
+        items: [
+          "Iliopsoas (psoas + iliacus) — כפיפה",
+          "TFL — הרחקה, כפיפה, רוטציה מדיאלית",
+          "Gluteus maximus / medius / minimus",
+          "מקרבי הירך: pectineus, adductor longus/brevis/magnus, gracilis",
+        ],
+      },
+    ],
   },
   {
     id: "knee",
     nameHe: "מפרק הברך",
     nameEn: "Knee joint",
     bones: ["femur", "tibia", "patella"],
-    typeHe: "סינוביאלי צירי (עם רכיב סיבובי בכפיפה)",
-    typeEn: "Modified hinge synovial",
-    movements: ["Flexion / extension", "סיבוב קל בכפיפה"],
-    notes:
-      "רצועות: ACL, PCL, MCL, LCL. מניסקוסים — fibrocartilage. עצמות: Femur, Tibia, Patella.",
+    typeHe: "סינוביאלי צירי חד-צירי + מפרק פטלوفמורלי מחליק",
+    typeEn: "Uniaxial synovial hinge + patellofemoral gliding",
+    movements: ["Flexion / extension במישור הסגיטלי", "סיבוב קל בכפיפה"],
+    notes: "שני מפרקים: tibiofemoral ו-patellofemoral. הפיקה שזורה בגיד הארבע-ראשי.",
+    details: [
+      {
+        title: "Tibiofemoral",
+        items: [
+          "עצמות: Femur (condyles) + Tibia (tibial plateau)",
+          "סוג: סינוביאלי, חד-צירי (uniaxial)",
+          "תנועות: כפיפה ופשיטה במישור הסגיטלי",
+        ],
+      },
+      {
+        title: "Patellofemoral",
+        items: [
+          "עצמות: Femur (patellar surface) + Patella",
+          "סוג: סינוביאלי, gliding",
+          "הפיקה שזורה בתוך גיד הארבע-ראשי — עצם ססמואידית",
+        ],
+      },
+      {
+        title: "רצועות צידיות",
+        items: [
+          "LCL — רצועה צידית חיצונית: מונעת קריסה החוצה (varus)",
+          "MCL — רצועה צידית פנימית: מונעת קריסה פנימה (valgus)",
+          "שתיהן מונעות תנועה עודפת במישור הפרונטלי ושומרות על יציבות מדיאלית–לטרלית",
+        ],
+      },
+      {
+        title: "רצועות צולבות",
+        items: [
+          "ACL — רצועה צולבת קדמית",
+          "PCL — רצועה צולבת אחורית",
+          "מונעות תנועה עודפת במישור הסגיטלי וההוריזונטלי",
+        ],
+      },
+      {
+        title: "יישור הברך — genu",
+        items: ["Genu varus — רגלי O", "Genu valgus — רגלי X"],
+      },
+      {
+        title: "מניסקוסים (סחוס סיבי)",
+        items: [
+          "מניסקוס לטרלי ומניסקוס מדיאלי",
+          "תפקידים: בלימת זעזועים, מניעת חיכוך, תאום בין חלקי המפרק, פיזור הנוזל הסינוביאלי",
+          "סימני קרע: כאב חד ופתאומי, הצטברות נוזל סינוביאלי, ברך «נעולה» (קושי ביישור)",
+        ],
+      },
+      {
+        title: "בעייתיות הסחוס ודרגות פגיעה",
+        items: [
+          "אין אספקת דם ישירה = אין התחדשות אחרי נזק; אין עצבוב ישיר = אין כאב בשלבים הראשונים",
+          "דרגה 1: לחץ נקודתי ממושך → שלפוחית על הסחוס",
+          "דרגה 2: סדקים בתוך הסחוס",
+          "דרגה 3: מחסור בסחוס באזור — העצם חשופה",
+          "דרגה 4: כמו 3 אך בהיקף רחב — שחיקת סחוס (אופייני לגיל מבוגר)",
+          "בדרגות 1–2 לעיתים אין כאב; ב-3–4 כאב בעיקר בהעמסת משקל",
+        ],
+      },
+      {
+        title: "פתולוגיות שכיחות במצגת",
+        items: [
+          "קרע ב-ACL",
+          "דלקת בבורסה אינפרה-פטלרית (infrapatellar bursitis)",
+          "אוסגוד-שלטר: בגילאי 9–16, עומס חוזר על גיד הפיקה ולוחית הצמיחה בגבשון הטיביה — אופייני לריצה וקפיצה",
+        ],
+      },
+      {
+        title: "שרירים מניעים (מהמצגת)",
+        items: [
+          "ארבע-ראשי: rectus femoris, vastus lateralis / medialis / intermedius — פשיטת ברך",
+          "המסטרינג: biceps femoris, semitendinosus, semimembranosus — כפיפת ברך",
+          "Gastrocnemius מסייע בכפיפת ברך",
+        ],
+      },
+    ],
   },
   {
     id: "ankle",
     nameHe: "מפרק הקרסול",
     nameEn: "Talocrural (ankle) joint",
     bones: ["tibia", "fibula", "talus"],
-    typeHe: "סינוביאלי צירי",
-    typeEn: "Hinge synovial",
-    movements: ["Dorsiflexion / plantar flexion"],
-    notes: "רצועות: deltoid (מדיאלי) ו-lateral collateral. Inversion/eversion בעיקר ב-subtalar.",
+    typeHe: "סינוביאלי צירי חד-צירי",
+    typeEn: "Uniaxial synovial hinge",
+    movements: ["Dorsiflexion / plantar flexion במישור הסגיטלי"],
+    notes: "Tibia + Fibula + Talus. Inversion/eversion בעיקר ב-subtalar. פתולוגיה שכיחה: ankle sprain.",
+    details: [
+      {
+        title: "עצמות המשתתפות",
+        items: ["Tibia", "Fibula", "Talus"],
+      },
+      {
+        title: "סוג ותנועות",
+        items: [
+          "סינוביאלי, חד-צירי (uniaxial)",
+          "Dorsi + plantar flexion — כפיפה גבית וכפיפה כפית, במישור הסגיטלי",
+        ],
+      },
+      {
+        title: "פתולוגיה",
+        items: ["Ankle sprain — נקע בקרסול (הפתולוגיה השכיחה במצגת)"],
+      },
+      {
+        title: "שרירים מניעים (מהמצגת)",
+        items: [
+          "Gastrocnemius — פלנטרפלקשן + סיוע בכפיפת ברך",
+          "Soleus — פלנטרפלקשן בלבד (לא חוצה את הברך)",
+          "Tibialis anterior — דורסיפלקשן; אחז בעצם שורש כף הרגל ומסרק 1",
+        ],
+      },
+    ],
   },
   {
     id: "subtalar",

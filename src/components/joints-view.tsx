@@ -18,7 +18,10 @@ export function JointsView() {
       <div className="grid gap-3 md:grid-cols-2">
         {joints.map((j) => {
           const boneNames = j.bones
-            .map((id) => bones.find((b) => b.id === id)?.nameHe ?? id)
+            .map((id) => {
+              const b = bones.find((x) => x.id === id);
+              return b ? `${b.nameEn} · ${b.nameHe}` : id;
+            })
             .join(" + ");
           return (
             <article
@@ -37,8 +40,8 @@ export function JointsView() {
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
                   {j.typeEn}
                 </p>
-                <h2 className="mt-1 text-lg font-bold">{j.nameHe}</h2>
-                <p className="term text-sm text-[var(--ink-soft)]">{j.nameEn}</p>
+                <h2 className="term mt-1 text-lg font-bold">{j.nameEn}</h2>
+                <p className="text-sm text-[var(--ink-soft)]">{j.nameHe}</p>
                 <p className="mt-2 text-sm">
                   <span className="text-[var(--ink-soft)]">עצמות: </span>
                   {boneNames}
@@ -57,13 +60,21 @@ export function JointsView() {
                     const meta = actionById(a);
                     return (
                       <span key={a} className="inline-flex items-center gap-1">
-                        <span className="text-[11px]">{meta?.he}</span>
+                        <span className="text-[11px]">
+                          <span className="term font-bold">{meta?.en}</span>
+                          {meta?.he ? ` · ${meta.he}` : ""}
+                        </span>
                         <PlaneBadge plane={meta?.plane ?? null} />
                       </span>
                     );
                   })}
                 </div>
                 {j.notes && <p className="mt-3 text-xs text-[var(--accent)]">{j.notes}</p>}
+                {j.details && j.details.length > 0 && (
+                  <p className="mt-3 text-[11px] text-[var(--ink-soft)]">
+                    לחצו על האיור לפירוט מהמצגת: רצועות, פתולוגיות ושרירים מניעים.
+                  </p>
+                )}
               </div>
             </article>
           );
@@ -75,8 +86,8 @@ export function JointsView() {
           onClose={() => setOpen(null)}
           kind="joints"
           id={open.id}
-          title={open.nameHe}
-          subtitle={open.nameEn}
+          title={open.nameEn}
+          subtitle={open.nameHe}
         >
           <ul className="list-disc pr-4 text-sm">
             {open.movements.map((m) => (
@@ -84,6 +95,16 @@ export function JointsView() {
             ))}
           </ul>
           {open.notes && <p className="mt-2 text-xs text-[var(--accent)]">{open.notes}</p>}
+          {open.details?.map((d) => (
+            <div key={d.title} className="mt-3">
+              <p className="text-sm font-semibold">{d.title}</p>
+              <ul className="mt-1 list-disc pr-4 text-sm leading-relaxed text-[var(--ink-soft)]">
+                {d.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </AnatomyLightbox>
       )}
     </>

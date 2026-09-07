@@ -143,8 +143,23 @@ export function AnatomyLightbox({
               )}
             />
             <p className="mt-2 text-center text-[11px] text-[var(--ink-soft)]">
-              איור: {meta.wikiTitle} · ויקיפדיה / ויקישיתוף
+              {meta.source === "course"
+                ? `איור ממצגת הגף התחתון · ${meta.wikiTitle}`
+                : `איור: ${meta.wikiTitle} · ויקיפדיה / ויקישיתוף`}
             </p>
+            {meta.extras && meta.extras.length > 0 && (
+              <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {meta.extras.map((img) => (
+                  <figure key={img.src} className="overflow-hidden rounded-lg border border-[var(--line)]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img.src} alt={img.label} className="h-32 w-full object-contain bg-[var(--paper)]" />
+                    <figcaption className="px-2 py-1.5 text-[10px] leading-snug text-[var(--ink-soft)]">
+                      {img.label}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <p className="px-4 py-8 text-center text-sm text-[var(--ink-soft)]">אין איור זמין</p>
