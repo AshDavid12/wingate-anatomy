@@ -11,10 +11,10 @@ import { cn } from "@/lib/utils";
 
 type Kind = Exclude<AnatomyKind, "regions">;
 
-const LABELS: { id: Kind; he: string }[] = [
-  { id: "muscles", he: "שרירים" },
-  { id: "bones", he: "עצמות" },
-  { id: "joints", he: "מפרקים" },
+const LABELS: { id: Kind; en: string; he: string }[] = [
+  { id: "muscles", en: "Muscles", he: "שרירים" },
+  { id: "bones", en: "Bones", he: "עצמות" },
+  { id: "joints", en: "Joints", he: "מפרקים" },
 ];
 
 type AtlasItem = {
@@ -43,7 +43,10 @@ export function Atlas({ query }: { query: string }) {
           id: m.id,
           he: m.nameHe,
           en: m.nameEn,
-          badge: REGIONS.find((r) => r.id === m.region)?.he,
+          badge: (() => {
+            const r = REGIONS.find((x) => x.id === m.region);
+            return r ? `${r.en} · ${r.he}` : undefined;
+          })(),
           color: REGION_COLORS[m.region],
         }));
     }
@@ -79,11 +82,11 @@ export function Atlas({ query }: { query: string }) {
                 : "border-[var(--line)] bg-[var(--card)]",
             )}
           >
-            {l.he}
+            {l.en} · {l.he}
           </button>
         ))}
         <span className="ms-auto self-center text-xs text-[var(--ink-soft)]">
-          {items.length} איורים · לחצו להגדלה
+          {items.length} figures · איורים · tap to enlarge · לחצו להגדלה
         </span>
       </div>
 

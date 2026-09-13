@@ -24,12 +24,12 @@ import type { Muscle } from "@/data/types";
 
 type Mode = "action" | "joint" | "bone" | "plane" | "similar";
 
-const MODES: { id: Mode; he: string; hint: string }[] = [
-  { id: "action", he: "לפי תנועה", hint: "אותה Action במפרקים שונים — למשל הרחקה בכתף מול הרחקה בירך" },
-  { id: "joint", he: "לפי מפרק", hint: "כל השרירים שפועלים על המפרק, מחולקים לפי תנועה ומישור" },
-  { id: "bone", he: "לפי עצם", hint: "מי מתחיל ומי נאחז — ואיזו תנועה כל אחד מייצר" },
-  { id: "plane", he: "לפי מישור", hint: "כל השרירים שתנועתם העיקרית במישור שבחרתם" },
-  { id: "similar", he: "שרירים דומים", hint: "אותה קבוצה, אותו מפרק+תנועה, אנטגוניסטים, אותה עצם" },
+const MODES: { id: Mode; en: string; he: string; hint: string }[] = [
+  { id: "action", en: "By action", he: "לפי תנועה", hint: "Same action at different joints — e.g. abduction at the shoulder vs hip. · אותה Action במפרקים שונים — למשל הרחקה בכתף מול הרחקה בירך" },
+  { id: "joint", en: "By joint", he: "לפי מפרק", hint: "Every muscle on that joint, grouped by action and plane. · כל השרירים שפועלים על המפרק, מחולקים לפי תנועה ומישור" },
+  { id: "bone", en: "By bone", he: "לפי עצם", hint: "Who starts here, who inserts here, and what each one does. · מי מתחיל ומי נאחז — ואיזו תנועה כל אחד מייצר" },
+  { id: "plane", en: "By plane", he: "לפי מישור", hint: "Muscles whose main action is in the plane you pick. · כל השרירים שתנועתם העיקרית במישור שבחרתם" },
+  { id: "similar", en: "Similar muscles", he: "שרירים דומים", hint: "Same family, same joint + action, antagonists, same bone. · אותה קבוצה, אותו מפרק+תנועה, אנטגוניסטים, אותה עצם" },
 ];
 
 export function CrossView() {
@@ -44,10 +44,10 @@ export function CrossView() {
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-xl font-bold">הצלבת מידע</h2>
+        <h2 className="text-xl font-bold">Cross-link · הצלבת מידע</h2>
         <p className="mt-1 text-sm text-[var(--ink-soft)]">
-          חברו תנועה ↔ מישור ↔ מפרק ↔ עצם. כך תזהו זוגות כמו Latissimus ו־Teres major, או
-          כופפי ברך מול פושטי ברך.
+          Connect action ↔ plane ↔ joint ↔ bone. Spot pairs like latissimus and teres major, or knee flexors vs extensors.
+          חברו תנועה ↔ מישור ↔ מפרק ↔ עצם. כך תזהו זוגות כמו Latissimus ו־Teres major, או כופפי ברך מול פושטי ברך.
         </p>
       </div>
 
@@ -64,7 +64,7 @@ export function CrossView() {
                 : "border-[var(--line)] bg-[var(--card)]",
             )}
           >
-            {m.he}
+            {m.en} · {m.he}
           </button>
         ))}
       </div>
@@ -113,7 +113,7 @@ export function CrossView() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="סננו עצם…"
+            placeholder="Filter a bone… · סננו עצם…"
             className="w-full rounded-xl border border-[var(--line)] bg-[var(--card)] px-3 py-2 text-sm"
           />
           <ChipRow
@@ -196,13 +196,15 @@ function MuscleRow({ m, extra }: { m: Muscle; extra?: string }) {
       <div className="min-w-0 flex-1">
         <NamePair en={m.nameEn} he={m.nameHe} heClassName="text-xs" />
         {extra && <p className="mt-1 text-xs text-[var(--accent)]">{extra}</p>}
-        <p className="mt-1 line-clamp-2 text-xs text-[var(--ink-soft)]">{m.actionHe}</p>
+        <p className="mt-1 line-clamp-2 text-xs text-[var(--ink-soft)]">
+          {m.actionEn} · {m.actionHe}
+        </p>
         <div className="mt-1 flex flex-wrap gap-1">
           {tags?.actions.slice(0, 4).map((a) => {
             const meta = actionById(a);
             return (
               <span key={a} className="rounded-full bg-[var(--paper-2)] px-2 py-0.5 text-[10px]">
-                {meta?.he}
+                {meta ? bilingual(meta.en, meta.he) : a}
               </span>
             );
           })}
@@ -227,12 +229,12 @@ function ActionPanel({ action }: { action: ActionId }) {
         </div>
         <p className="mt-1 text-sm text-[var(--ink-soft)]">{meta.note}</p>
         <p className="mt-2 text-xs">
-          {list.length} שרירים · שימו לב לאותה תנועה במפרקים שונים — זה בדיוק מה שהמבחן אוהב להצליב.
+          {list.length} muscles · שרירים · same action at different joints — that is what the exam likes to cross. · שימו לב לאותה תנועה במפרקים שונים.
         </p>
       </div>
       {groups.map((g) => (
         <div key={g.joint}>
-          <h4 className="mb-2 font-semibold">{g.he}</h4>
+          <h4 className="mb-2 font-semibold">{g.en} · {g.he}</h4>
           <div className="grid gap-2 md:grid-cols-2">
             {g.muscles.map((m) => (
               <MuscleRow key={m.id} m={m} />
@@ -257,17 +259,17 @@ function JointPanel({ joint }: { joint: JointTag }) {
     <div className="space-y-3">
       <div className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--accent)]">
-          מפרק נבחר
+          Selected joint · מפרק נבחר
         </p>
         <h3 className="term text-lg font-bold">{meta?.en}</h3>
         <p className="text-sm text-[var(--ink-soft)]">{meta?.he}</p>
         <p className="mt-1 text-sm">
-          {list.length} שרירים שפועלים על מפרק זה
+          {list.length} muscles on this joint · שרירים שפועלים על מפרק זה
         </p>
         <div className="mt-2 flex flex-wrap gap-1">
           {byAction.map((row) => (
             <span key={row.action} className="inline-flex items-center gap-1">
-              <span className="text-xs">{row.meta?.he}</span>
+              <span className="text-xs">{row.meta ? bilingual(row.meta.en, row.meta.he) : row.action}</span>
               <PlaneBadge plane={row.meta?.plane ?? null} />
             </span>
           ))}
@@ -275,7 +277,7 @@ function JointPanel({ joint }: { joint: JointTag }) {
       </div>
       {list.length === 0 && (
         <p className="rounded-xl border border-dashed border-[var(--line)] p-4 text-sm text-[var(--ink-soft)]">
-          אין שרירים מתויגים למפרק זה.
+          No muscles tagged to this joint. · אין שרירים מתויגים למפרק זה.
         </p>
       )}
       {byAction.map((row) => (
@@ -315,19 +317,19 @@ function BonePanel({ boneId }: { boneId: string }) {
           </ul>
         </div>
       </div>
-      <h4 className="font-semibold">Origin — שרירים שמתחילים כאן</h4>
+      <h4 className="font-semibold">Origin — muscles that start here · שרירים שמתחילים כאן</h4>
       <div className="grid gap-2 md:grid-cols-2">
         {origins.map((m) => (
-          <MuscleRow key={m.id} m={m} extra={m.actionHe} />
+          <MuscleRow key={m.id} m={m} extra={`${m.actionEn} · ${m.actionHe}`} />
         ))}
-        {origins.length === 0 && <p className="text-sm text-[var(--ink-soft)]">אין ברשימה</p>}
+        {origins.length === 0 && <p className="text-sm text-[var(--ink-soft)]">None in the list · אין ברשימה</p>}
       </div>
-      <h4 className="font-semibold">Insertion — שרירים שנאחזים כאן</h4>
+      <h4 className="font-semibold">Insertion — muscles that attach here · שרירים שנאחזים כאן</h4>
       <div className="grid gap-2 md:grid-cols-2">
         {insertions.map((m) => (
-          <MuscleRow key={m.id} m={m} extra={m.actionHe} />
+          <MuscleRow key={m.id} m={m} extra={`${m.actionEn} · ${m.actionHe}`} />
         ))}
-        {insertions.length === 0 && <p className="text-sm text-[var(--ink-soft)]">אין ברשימה</p>}
+        {insertions.length === 0 && <p className="text-sm text-[var(--ink-soft)]">None in the list · אין ברשימה</p>}
       </div>
     </div>
   );
@@ -356,7 +358,7 @@ function PlanePanel({ plane }: { plane: PlaneId }) {
           </div>
         </div>
       ))}
-      <p className="text-xs text-[var(--ink-soft)]">{list.length} שרירים נוגעים במישור זה</p>
+      <p className="text-xs text-[var(--ink-soft)]">{list.length} muscles touch this plane · שרירים נוגעים במישור זה</p>
     </div>
   );
 }
@@ -373,7 +375,7 @@ function SimilarPanel({ muscleId }: { muscleId: string }) {
         <AnatomyThumb kind="muscles" id={m.id} alt={m.nameHe} size="md" interactive={false} />
         <div>
           <NamePair en={m.nameEn} he={m.nameHe} enClassName="text-lg" heClassName="text-sm" />
-          {family && <p className="mt-1 text-xs text-[var(--accent)]">{family.he}</p>}
+          {family && <p className="mt-1 text-xs text-[var(--accent)]">{family.en} · {family.he}</p>}
           <div className="mt-2 flex flex-wrap gap-1">
             {tags.joints.map((j) => (
               <span key={j} className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[11px]">
@@ -395,11 +397,11 @@ function SimilarPanel({ muscleId }: { muscleId: string }) {
               );
             })}
           </div>
-          <p className="mt-2 text-sm">{m.originHe}</p>
-          <p className="text-sm">{m.insertionHe}</p>
+          <p className="mt-2 text-sm">{m.originEn} · {m.originHe}</p>
+          <p className="text-sm">{m.insertionEn} · {m.insertionHe}</p>
         </div>
       </div>
-      <h4 className="font-semibold">קשורים — לשינון בהצלבה</h4>
+      <h4 className="font-semibold">Related — for cross study · קשורים — לשינון בהצלבה</h4>
       <div className="grid gap-2 md:grid-cols-2">
         {hits.map((h) => (
           <MuscleRow key={h.muscle.id} m={h.muscle} extra={h.reasons.join(" · ")} />

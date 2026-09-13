@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { DICTIONARY_TOPICS, dictionaryTerms, searchDictionary } from "@/data/dictionary";
+import { DICTIONARY_TOPICS, dictionaryTerms, searchDictionary, topicLabel } from "@/data/dictionary";
 import { directionalTerms, keyConcepts, movementTerms } from "@/data/terms";
 import { EmptyState } from "@/components/muscle-table";
 import { cn } from "@/lib/utils";
@@ -26,10 +26,11 @@ export function Glossary({ query }: { query: string }) {
   return (
     <div className="space-y-8">
       <section>
-        <h2 className="text-xl font-bold">מילון אנטומיה · שלד ושריר</h2>
+        <h2 className="text-xl font-bold">Anatomy glossary · מילון אנטומיה · שלד ושריר</h2>
         <p className="mt-1 max-w-3xl text-sm text-[var(--ink-soft)]">
-          מונחי יסוד מהחוברת: רקמות, עצם, סחוס, מפרקים, רצועות, גידים ומבנה שריר השלד.
-          סמנו «הסתר הגדרות» ותרגלו בעל-פה — כמו בכרטיסיות.
+          Core booklet terms: tissues, bone, cartilage, joints, ligaments, tendons, and skeletal muscle.
+          Check «Hide definitions» and say them out loud — like flashcards.
+          מונחי יסוד מהחוברת. סמנו «הסתר הגדרות» ותרגלו בעל-פה — כמו בכרטיסיות.
         </p>
 
         <div className="mt-4 flex flex-wrap gap-1.5">
@@ -37,14 +38,14 @@ export function Glossary({ query }: { query: string }) {
             active={topic === "all"}
             onClick={() => setTopic("all")}
           >
-            הכל ({searchDictionary(query).length})
+            All · הכל ({searchDictionary(query).length})
           </TopicChip>
           {DICTIONARY_TOPICS.map((tp) => {
             const n = searchDictionary(query).filter((t) => t.topic === tp).length;
             if (n === 0) return null;
             return (
               <TopicChip key={tp} active={topic === tp} onClick={() => setTopic(tp)}>
-                {tp} ({n})
+                {topicLabel(tp)} ({n})
               </TopicChip>
             );
           })}
@@ -56,16 +57,16 @@ export function Glossary({ query }: { query: string }) {
             checked={hideDef}
             onChange={(e) => setHideDef(e.target.checked)}
           />
-          הסתר הגדרות לתרגול
+          Hide definitions to practice · הסתר הגדרות לתרגול
         </label>
       </section>
 
       {grouped.length === 0 ? (
-        <EmptyState title="אין מונחים תואמים" body="נסו שם בעברית, באנגלית או נושא אחר." />
+        <EmptyState title="No matching terms · אין מונחים תואמים" body="Try a name in English, Hebrew, or another topic. · נסו שם בעברית, באנגלית או נושא אחר." />
       ) : (
         grouped.map((g) => (
           <section key={g.topic}>
-            <h3 className="text-lg font-bold">{g.topic}</h3>
+            <h3 className="text-lg font-bold">{topicLabel(g.topic)}</h3>
             <div className="mt-3 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--card)] shadow-sm">
               <table className="w-full text-sm">
                 <thead className="bg-[var(--paper-2)] text-xs text-[var(--ink-soft)]">
@@ -74,7 +75,7 @@ export function Glossary({ query }: { query: string }) {
                     <th className="hidden px-4 py-2 text-right font-semibold sm:table-cell">
                       עברית
                     </th>
-                    <th className="px-4 py-2 text-right font-semibold">הגדרה</th>
+                    <th className="px-4 py-2 text-right font-semibold">Definition · הגדרה</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -107,29 +108,40 @@ export function Glossary({ query }: { query: string }) {
       )}
 
       <section>
-        <h2 className="text-xl font-bold">Origin · Insertion · Action — ומושגי יסוד</h2>
+        <h2 className="text-xl font-bold">Origin · Insertion · Action — and key ideas · ומושגי יסוד</h2>
         <div className="mt-3 grid gap-3 md:grid-cols-2">
           {keyConcepts.map((c) => (
             <article
-              key={c.title}
+              key={c.titleEn}
               className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-5 shadow-sm"
             >
-              <h3 className="font-bold">{c.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--ink-soft)]">{c.body}</p>
+              <h3 className="font-bold">{c.titleEn}</h3>
+              <p className="text-sm text-[var(--ink-soft)]">{c.titleHe}</p>
+              <p className="mt-2 text-sm leading-relaxed">{c.bodyHe}</p>
+              <p className="term mt-1 text-xs leading-relaxed text-[var(--ink-soft)]">{c.bodyEn}</p>
             </article>
           ))}
         </div>
       </section>
 
+      <section className="rounded-2xl border border-dashed border-[var(--accent)]/40 bg-[var(--paper-2)] p-4">
+        <h2 className="text-lg font-bold">Origin / Insertion memory tips</h2>
+        <p className="mt-1 text-sm text-[var(--ink-soft)]">
+          Acronyms and parking-lot groups are in the{" "}
+          <span className="term font-semibold">Memorize · שינון</span> tab — SITS, PFPF, SGT, CAS, PALMG.
+          ראשי תיבות וקבוצות אחיזה בלשונית «שינון».
+        </p>
+      </section>
+
       <section>
-        <h2 className="text-xl font-bold">מונחי תנועה</h2>
+        <h2 className="text-xl font-bold">Movement terms · מונחי תנועה</h2>
         <div className="mt-3 overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--card)]">
           <table className="w-full text-sm">
             <thead className="bg-[var(--paper-2)] text-xs text-[var(--ink-soft)]">
               <tr>
                 <th className="px-4 py-2 text-right">English</th>
                 <th className="px-4 py-2 text-right">עברית</th>
-                <th className="px-4 py-2 text-right">הסבר</th>
+                <th className="px-4 py-2 text-right">Note · הסבר</th>
               </tr>
             </thead>
             <tbody>
@@ -146,7 +158,7 @@ export function Glossary({ query }: { query: string }) {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold">כיוונים אנטומיים</h2>
+        <h2 className="text-xl font-bold">Anatomical directions · כיוונים אנטומיים</h2>
         <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-5">
           {directionalTerms.map((t) => (
             <div
@@ -161,7 +173,7 @@ export function Glossary({ query }: { query: string }) {
       </section>
 
       <p className="text-center text-xs text-[var(--ink-soft)]">
-        {dictionaryTerms.length} מונחים במילון השלד-שריר
+        {dictionaryTerms.length} musculoskeletal glossary terms · מונחים במילון השלד-שריר
       </p>
     </div>
   );

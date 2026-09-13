@@ -11,6 +11,8 @@ import { actionById } from "@/data/planes";
 import { PlaneBadge } from "@/components/planes-view";
 import { JOINT_TAGS } from "@/data/muscle-tags";
 import { bilingual, NamePair } from "@/components/name-pair";
+import { MuscleWhyBox } from "@/components/why-view";
+import { MuscleHookBox, MuscleHookChips } from "@/components/oi-mnemonics";
 import { cn } from "@/lib/utils";
 
 type Hidden = { o: boolean; i: boolean; a: boolean };
@@ -29,7 +31,7 @@ export function MuscleTable({
 
   if (muscles.length === 0) {
     return (
-      <EmptyState title="אין שרירים תואמים" body="נסו מילת חיפוש אחרת או אפסו את הסינון." />
+      <EmptyState title="No matching muscles · אין שרירים תואמים" body="Try another search or reset the filter. · נסו מילת חיפוש אחרת או אפסו את הסינון." />
     );
   }
 
@@ -52,7 +54,7 @@ export function MuscleTable({
         <table className="w-full text-sm">
           <thead className="bg-[var(--paper-2)] text-right text-xs uppercase tracking-wide text-[var(--ink-soft)]">
             <tr>
-              <th className="px-4 py-3 font-semibold">שריר</th>
+              <th className="px-4 py-3 font-semibold">Muscle · שריר</th>
               <th className="px-4 py-3 font-semibold">
                 Origin <span className="font-normal">התחלה</span>
               </th>
@@ -92,7 +94,7 @@ export function MuscleTable({
                 <td className={cn("px-4 py-3", hidden.a && "hide-study")}>
                   <NamePair en={m.actionEn} he={m.actionHe} enClassName="text-sm" heClassName="text-xs" />
                   {m.innervation && (
-                    <p className="mt-1 text-[11px] text-[var(--ink-soft)]">עצבוב: {m.innervation}</p>
+                    <p className="mt-1 text-[11px] text-[var(--ink-soft)]">Innervation · עצבוב: {m.innervation}</p>
                   )}
                 </td>
               </tr>
@@ -121,7 +123,7 @@ export function MuscleTable({
               <Field label="Insertion · סיום" hidden={hidden.i} he={m.insertionHe} en={m.insertionEn} />
               <Field label="Action · תנועה" hidden={hidden.a} he={m.actionHe} en={m.actionEn} />
               {m.innervation && (
-                <p className="mt-2 text-xs text-[var(--ink-soft)]">עצבוב: {m.innervation}</p>
+                <p className="mt-2 text-xs text-[var(--ink-soft)]">Innervation · עצבוב: {m.innervation}</p>
               )}
               {m.notes && <p className="mt-2 text-xs text-[var(--accent)]">{m.notes}</p>}
             </button>
@@ -149,6 +151,12 @@ export function MuscleTable({
           subtitle={open.nameHe}
         >
           <RelatedMuscles muscleId={open.id} />
+          <div className="mt-4">
+            <MuscleWhyBox muscleId={open.id} />
+          </div>
+          <div className="mt-4">
+            <MuscleHookBox muscleId={open.id} />
+          </div>
           <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
             <div>
               <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
@@ -184,7 +192,7 @@ function MuscleName({ m }: { m: Muscle }) {
         <span className="term font-bold">{m.nameEn}</span>
         {!m.core && (
           <span className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[10px] text-[var(--ink-soft)]">
-            הרחבה
+            Extra · הרחבה
           </span>
         )}
       </div>
@@ -218,6 +226,7 @@ function MuscleName({ m }: { m: Muscle }) {
           <PlaneBadge key={p} plane={p} />
         ))}
       </div>
+      <MuscleHookChips muscleId={m.id} />
     </div>
   );
 }
@@ -259,8 +268,9 @@ function RelatedMuscles({ muscleId }: { muscleId: string }) {
   if (hits.length === 0) return null;
   return (
     <div className="rounded-xl border border-[var(--accent)]/30 bg-[var(--paper-2)] p-3">
-      <h3 className="text-sm font-bold">הצלבה · שרירים קשורים</h3>
+      <h3 className="text-sm font-bold">Related muscles · שרירים קשורים</h3>
       <p className="mt-0.5 text-[11px] text-[var(--ink-soft)]">
+        Same family, same joint + action, or antagonist — for cross study.
         אותה קבוצה, אותו מפרק+תנועה, או אנטגוניסט — לשינון בהצלבה.
       </p>
       <div className="mt-2 flex flex-wrap gap-2">

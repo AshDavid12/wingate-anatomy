@@ -10,9 +10,9 @@ import { cn } from "@/lib/utils";
 import type { Bone, Muscle } from "@/data/types";
 
 const SKELETON_LABEL: Record<string, string> = {
-  axial: "שלד ציר",
-  "appendicular-upper": "תוספת עליונה",
-  "appendicular-lower": "תוספת תחתונה",
+  axial: "Axial · שלד ציר",
+  "appendicular-upper": "Upper appendicular · תוספת עליונה",
+  "appendicular-lower": "Lower appendicular · תוספת תחתונה",
 };
 
 export function BoneTable({ query }: { query: string }) {
@@ -21,24 +21,25 @@ export function BoneTable({ query }: { query: string }) {
   const list = useMemo(() => searchBones(query), [query]);
 
   if (list.length === 0) {
-    return <EmptyState title="אין עצמות תואמות" body="נסו שם עצם, landmark או מפרק." />;
+    return <EmptyState title="No matching bones · אין עצמות תואמות" body="Try a bone name, landmark, or joint. · נסו שם עצם, landmark או מפרק." />;
   }
 
   return (
     <div className="space-y-3">
       <p className="text-sm text-[var(--ink-soft)]">
-        לכל עצם: השרירים ש־<span className="term">Origin</span> שלהם עליה, השרירים
-        שנאחזים בה (<span className="term">Insertion</span>), והתנועות במפרקים
-        שהעצם משתתפת בהם.
+        For each bone: muscles whose <span className="term">Origin</span> is here, muscles
+        that insert here (<span className="term">Insertion</span>), and the joint movements
+        that bone takes part in.
+        לכל עצם: השרירים ש־Origin שלהם עליה, השרירים שנאחזים בה, והתנועות במפרקים שהעצם משתתפת בהם.
       </p>
 
       <div className="hidden overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--card)] shadow-sm lg:block">
         <table className="w-full text-sm">
           <thead className="bg-[var(--paper-2)] text-xs uppercase tracking-wide text-[var(--ink-soft)]">
             <tr>
-              <th className="px-4 py-3 text-right font-semibold">עצם</th>
-              <th className="px-4 py-3 text-right font-semibold">Origin · שרירים שמתחילים כאן</th>
-              <th className="px-4 py-3 text-right font-semibold">Insertion · שרירים שנאחזים כאן</th>
+              <th className="px-4 py-3 text-right font-semibold">Bone · עצם</th>
+              <th className="px-4 py-3 text-right font-semibold">Origin · muscles that start here · שרירים שמתחילים כאן</th>
+              <th className="px-4 py-3 text-right font-semibold">Insertion · muscles that attach here · שרירים שנאחזים כאן</th>
               <th className="px-4 py-3 text-right font-semibold">Action / movement</th>
             </tr>
           </thead>
@@ -66,10 +67,10 @@ export function BoneTable({ query }: { query: string }) {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <MuscleChips list={origins} empty="אין origin ברשימת השרירים" />
+                    <MuscleChips list={origins} empty="No origin in the muscle list · אין origin ברשימת השרירים" />
                   </td>
                   <td className="px-4 py-3">
-                    <MuscleChips list={insertions} empty="אין insertion ברשימת השרירים" />
+                    <MuscleChips list={insertions} empty="No insertion in the muscle list · אין insertion ברשימת השרירים" />
                   </td>
                   <td className="px-4 py-3">
                     <ul className="list-disc pr-4 text-xs leading-relaxed">
@@ -116,7 +117,7 @@ export function BoneTable({ query }: { query: string }) {
                     {SKELETON_LABEL[b.skeleton]} · {b.type}
                   </p>
                 </div>
-                <span className="text-xs text-[var(--accent)]">{open ? "סגור" : "פתח"}</span>
+                <span className="text-xs text-[var(--accent)]">{open ? "Close · סגור" : "Open · פתח"}</span>
               </button>
               <div className={cn("space-y-3 px-4 pb-4", !open && "hidden")}>
                 <div>

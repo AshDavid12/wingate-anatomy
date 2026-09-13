@@ -29,6 +29,34 @@ export const DICTIONARY_TOPICS = [
   "גף תחתון",
 ] as const;
 
+export const TOPIC_EN: Record<(typeof DICTIONARY_TOPICS)[number], string> = {
+  "מבוא לאנטומיה": "Intro to anatomy",
+  "רמות הארגון בגופנו": "Levels of organization",
+  "סוגי רקמות": "Tissue types",
+  "מבנה התא": "Cell structure",
+  "רקמת חיבור": "Connective tissue",
+  "רקמת העצם": "Bone tissue",
+  "סוגי עצמות": "Bone types",
+  "מבנה עצם ארוכה": "Long-bone structure",
+  "התגרמות": "Ossification",
+  "תאי העצם": "Bone cells",
+  "אוסטאופורוזיס": "Osteoporosis",
+  "רקמת הסחוס": "Cartilage",
+  "מפרקים": "Joints",
+  "רצועות": "Ligaments",
+  "גידים": "Tendons",
+  "רקמת השריר": "Muscle tissue",
+  "מבנה שריר שלד": "Skeletal muscle structure",
+  "תהליך הכיווץ": "Contraction",
+  "תפקידי השריר": "Muscle functions",
+  "גף תחתון": "Lower limb",
+};
+
+export function topicLabel(topic: string) {
+  const en = TOPIC_EN[topic as (typeof DICTIONARY_TOPICS)[number]];
+  return en ? `${en} · ${topic}` : topic;
+}
+
 export const dictionaryTerms: DictionaryTerm[] = [
   {
     id: "d1",

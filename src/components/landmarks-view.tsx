@@ -39,19 +39,19 @@ export function LandmarksView({ query }: { query: string }) {
   }, [query, region, examOnly]);
 
   if (list.length === 0) {
-    return <EmptyState title="אין חלקי עצם תואמים" body="נסו שם, מיקום או עצם — למשל acromion, ASIS, זיז." />;
+    return <EmptyState title="No matching landmarks · אין חלקי עצם תואמים" body="Try a name, location, or bone — e.g. acromion, ASIS, זיז." />;
   }
 
   return (
     <div>
       <p className="mb-3 text-sm text-[var(--ink-soft)]">
-        חלקי העצם מהמצגות — שם, מיקום ומבט. האיור מסמן את החלק (לרוב באדום). סמנו «הסתר
-        שמות» ותרגלו זיהוי כמו במבחן.
+        Bone landmarks from the slides — name, location, and view. The figure marks the part (usually in red). Check «Hide names» and practice ID like the exam.
+        חלקי העצם מהמצגות — שם, מיקום ומבט. סמנו «הסתר שמות» ותרגלו זיהוי כמו במבחן.
       </p>
 
       <div className="mb-3 flex flex-wrap gap-1.5">
         <FilterChip active={region === "all"} onClick={() => setRegion("all")}>
-          הכל ({(examOnly ? examLandmarks : landmarks).length})
+          All · הכל ({(examOnly ? examLandmarks : landmarks).length})
         </FilterChip>
         {LANDMARK_REGIONS.map((r) => {
           const n = (examOnly ? examLandmarks : landmarks).filter((l) => l.region === r.id).length;
@@ -67,19 +67,19 @@ export function LandmarksView({ query }: { query: string }) {
       <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
         <label className="flex items-center gap-2 rounded-lg border border-[var(--line)] bg-[var(--card)] px-3 py-1.5">
           <input type="checkbox" checked={examOnly} onChange={(e) => setExamOnly(e.target.checked)} />
-          ליבת המצגות בלבד
+          Core slides only · ליבת המצגות בלבד
         </label>
         <label className="flex items-center gap-2 rounded-lg border border-[var(--line)] bg-[var(--card)] px-3 py-1.5">
           <input type="checkbox" checked={hideNames} onChange={(e) => setHideNames(e.target.checked)} />
-          הסתר שמות לתרגול
+          Hide names to practice · הסתר שמות לתרגול
         </label>
-        <span className="ms-auto text-xs text-[var(--ink-soft)]">מוצגים {list.length} חלקים</span>
+        <span className="ms-auto text-xs text-[var(--ink-soft)]">Showing {list.length} parts · מוצגים {list.length} חלקים</span>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {list.map((l) => {
           const img = imageRef(l);
-          const regionHe = LANDMARK_REGIONS.find((r) => r.id === l.region)?.he;
+          const regionMeta = LANDMARK_REGIONS.find((r) => r.id === l.region);
           return (
             <button
               key={l.id}
@@ -107,7 +107,7 @@ export function LandmarksView({ query }: { query: string }) {
                   {l.locationHe}
                 </p>
                 <span className="mt-1 inline-block rounded-full border border-[var(--line)] bg-[var(--paper-2)] px-2 py-0.5 text-[10px]">
-                  {regionHe}
+                  {regionMeta ? `${regionMeta.en} · ${regionMeta.he}` : l.region}
                 </span>
               </div>
             </button>
@@ -127,27 +127,27 @@ export function LandmarksView({ query }: { query: string }) {
           <dl className="grid gap-3 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
-                מיקום
+                Location · מיקום
               </dt>
               <dd className="mt-0.5">{open.locationHe}</dd>
             </div>
             {open.viewHe && (
               <div>
                 <dt className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
-                  מבט
+                  View · מבט
                 </dt>
                 <dd className="mt-0.5">{open.viewHe}</dd>
               </div>
             )}
             <div>
               <dt className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
-                עצם
+                Bone · עצם
               </dt>
               <dd className="mt-0.5">{boneName(open.boneId)}</dd>
             </div>
             <div>
               <dt className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
-                אזור
+                Region · אזור
               </dt>
               <dd className="mt-0.5">
                 <NamePair
@@ -160,7 +160,7 @@ export function LandmarksView({ query }: { query: string }) {
           </dl>
           {open.note && <p className="mt-3 text-sm leading-relaxed">{open.note}</p>}
           {open.optional && (
-            <p className="mt-2 text-xs text-[var(--ink-soft)]">במצגות: אין צורך לזכור בעל-פה.</p>
+            <p className="mt-2 text-xs text-[var(--ink-soft)]">On the slides: no need to memorize. · במצגות: אין צורך לזכור בעל-פה.</p>
           )}
         </AnatomyLightbox>
       )}

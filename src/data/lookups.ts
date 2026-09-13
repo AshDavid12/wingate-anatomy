@@ -3,6 +3,8 @@ import { muscles } from "./muscles";
 import { landmarks } from "./landmarks";
 import { MUSCLE_TAGS, JOINT_TAGS } from "./muscle-tags";
 import { actionById } from "./planes";
+import { whyById } from "./why-moves";
+import { hooksForMuscle, hookSearchBlob } from "./oi-mnemonics";
 import type { Bone, Muscle } from "./types";
 
 export function musclesForBone(boneId: string): {
@@ -34,6 +36,10 @@ export function searchMuscles(query: string, list: Muscle[] = muscles): Muscle[]
       m.actionEn,
       m.innervation ?? "",
       m.notes ?? "",
+      whyById(m.id)?.becauseHe ?? "",
+      whyById(m.id)?.becauseEn ?? "",
+      whyById(m.id)?.sideHe ?? "",
+      ...hooksForMuscle(m.id).map(hookSearchBlob),
       ...(MUSCLE_TAGS[m.id]?.actions.map((a) => `${actionById(a)?.he ?? ""} ${actionById(a)?.en ?? ""}`) ?? []),
       ...(MUSCLE_TAGS[m.id]?.joints.map((j) => JOINT_TAGS.find((x) => x.id === j)?.he ?? j) ?? []),
     ]

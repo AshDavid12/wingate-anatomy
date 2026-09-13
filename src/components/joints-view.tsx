@@ -43,11 +43,11 @@ export function JointsView() {
                 <h2 className="term mt-1 text-lg font-bold">{j.nameEn}</h2>
                 <p className="text-sm text-[var(--ink-soft)]">{j.nameHe}</p>
                 <p className="mt-2 text-sm">
-                  <span className="text-[var(--ink-soft)]">עצמות: </span>
+                  <span className="text-[var(--ink-soft)]">Bones · עצמות: </span>
                   {boneNames}
                 </p>
                 <p className="mt-1 text-sm">
-                  <span className="text-[var(--ink-soft)]">סוג: </span>
+                  <span className="text-[var(--ink-soft)]">Type · סוג: </span>
                   {j.typeHe}
                 </p>
                 <ul className="mt-3 list-disc pr-4 text-sm leading-relaxed">
@@ -72,6 +72,7 @@ export function JointsView() {
                 {j.notes && <p className="mt-3 text-xs text-[var(--accent)]">{j.notes}</p>}
                 {j.details && j.details.length > 0 && (
                   <p className="mt-3 text-[11px] text-[var(--ink-soft)]">
+                    Tap the figure for slide details: ligaments, pathologies, and movers.
                     לחצו על האיור לפירוט מהמצגת: רצועות, פתולוגיות ושרירים מניעים.
                   </p>
                 )}

@@ -9,9 +9,9 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  title: "אנטומיה למבחן · Origin · Insertion · Action",
+  title: "Anatomy for the exam · אנטומיה למבחן · Origin · Insertion · Action",
   description:
-    "טבלאות שרירים ועצמות עם Origin, Insertion ותנועה — כלי לימוד למבחן אנטומיה במכון וינגייט",
+    "Muscle and bone tables with Origin, Insertion, and Action — a Wingate anatomy exam study tool. טבלאות שרירים ועצמות עם Origin, Insertion ותנועה.",
 };
 
 export default function RootLayout({
