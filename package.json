@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 4317",
+    "stop": "bash scripts/stop-dev.sh",
     "restart": "bash scripts/restart-dev.sh",
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p ${PORT:-4317}",

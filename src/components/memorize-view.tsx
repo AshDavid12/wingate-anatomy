@@ -12,6 +12,7 @@ import {
 import { REGIONS, REGION_COLORS, type RegionId } from "@/data/regions";
 import { AnatomyThumb } from "@/components/anatomy-image";
 import { EmptyState } from "@/components/muscle-table";
+import { ActionGroupsView } from "@/components/action-groups";
 import { bilingual, NamePair } from "@/components/name-pair";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +54,52 @@ const TIPS = [
 ];
 
 export function MemorizeView({
+  region,
+  query,
+}: {
+  region: RegionId | "all";
+  query: string;
+}) {
+  const [page, setPage] = useState<"movements" | "attachments">("movements");
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap gap-1.5">
+        <button
+          type="button"
+          onClick={() => setPage("movements")}
+          className={cn(
+            "rounded-full border px-3 py-1.5 text-sm font-medium transition",
+            page === "movements"
+              ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
+              : "border-[var(--line)] bg-[var(--card)] text-[var(--ink-soft)] hover:border-[var(--ink)]",
+          )}
+        >
+          Movements · תנועות לפי קבוצה
+        </button>
+        <button
+          type="button"
+          onClick={() => setPage("attachments")}
+          className={cn(
+            "rounded-full border px-3 py-1.5 text-sm font-medium transition",
+            page === "attachments"
+              ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
+              : "border-[var(--line)] bg-[var(--card)] text-[var(--ink-soft)] hover:border-[var(--ink)]",
+          )}
+        >
+          Origin / Insertion · אחיזות
+        </button>
+      </div>
+      {page === "movements" ? (
+        <ActionGroupsView region={region} query={query} />
+      ) : (
+        <AttachmentTips region={region} query={query} />
+      )}
+    </div>
+  );
+}
+
+function AttachmentTips({
   region,
   query,
 }: {

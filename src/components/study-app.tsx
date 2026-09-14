@@ -153,7 +153,7 @@ export function StudyApp() {
                     : tab === "landmarks" || (tab === "cards" && cardDeck === "landmarks")
                       ? "Search a landmark: acromion, ASIS, זיז, גומה…"
                       : tab === "memorize" || (tab === "cards" && cardDeck === "hooks")
-                      ? "Search a tip: SITS, PFPF, lady, pes, CAS, coracoid…"
+                      ? "Search: hip flexors, SITS, PFPF, pes, CAS, coracoid…"
                       : "Search muscle, bone, origin, insertion, action, SITS, PFPF… · חיפוש שריר, עצם, origin, או קיצור שינון…"
                 }
                 className="w-full rounded-xl border border-[var(--line)] bg-[var(--card)] py-2.5 pr-10 pl-3 text-sm outline-none ring-[var(--accent-2)] focus:ring-2"

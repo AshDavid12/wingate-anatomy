@@ -15,6 +15,7 @@ import { AnatomyThumb } from "@/components/anatomy-image";
 import { EmptyState } from "@/components/muscle-table";
 import { ACTIONS, FAMILIES, PLANES, allGymMoves, planeById } from "@/data/planes";
 import { OI_HOOKS, hooksForRegion, type OiHook } from "@/data/oi-mnemonics";
+import { EXAM_QUESTIONS, OPTION_LETTERS, type ExamQuestion } from "@/data/exam-questions";
 import { REGIONS, type RegionId } from "@/data/regions";
 import { cn } from "@/lib/utils";
 import type { Muscle } from "@/data/types";
@@ -30,17 +31,20 @@ type Kind =
   | "hook"
   | "term"
   | "landmark"
-  | "landmark-pic";
+  | "landmark-pic"
+  | "exam";
 
-type QuizGroup = "all" | "muscles" | "family" | "hook" | "plane" | "term" | "landmark";
+type QuizGroup = "all" | "exam" | "muscles" | "family" | "hook" | "plane" | "term" | "landmark";
 
 type Question = {
   muscleId: string;
   prompt: string;
+  promptEn?: string;
   kind: Kind;
   answer: string;
   options: string[];
   landmarkId?: string;
+  examId?: number;
 };
 
 type QuizFilter = {
@@ -58,9 +62,11 @@ const HOOK_KINDS: Kind[] = ["hook"];
 const PLANE_KINDS: Kind[] = ["plane"];
 const TERM_KINDS: Kind[] = ["term"];
 const LANDMARK_KINDS: Kind[] = ["landmark", "landmark-pic"];
+const EXAM_KINDS: Kind[] = ["exam"];
 
 const GROUPS: { id: QuizGroup; en: string; he: string }[] = [
   { id: "all", en: "All", he: "הכל" },
+  { id: "exam", en: "Practice exam", he: "מבחן לדוגמה" },
   { id: "muscles", en: "Muscles", he: "שרירים" },
   { id: "family", en: "Families", he: "קבוצות" },
   { id: "hook", en: "Memory hooks", he: "קיצורי שינון" },
@@ -145,6 +151,9 @@ function computeFilter(
   const familySelected = familyId !== "all";
   let kinds: Kind[];
   switch (group) {
+    case "exam":
+      kinds = EXAM_KINDS;
+      break;
     case "muscles":
       kinds = MUSCLE_KINDS;
       break;
@@ -176,6 +185,7 @@ function computeFilter(
           ...PLANE_KINDS,
           ...TERM_KINDS,
           ...LANDMARK_KINDS,
+          ...EXAM_KINDS,
         ];
       }
   }
@@ -302,7 +312,29 @@ function buildTermQuestion(pool: typeof dictionaryTerms): Question | null {
   };
 }
 
+function examToQuestion(item: ExamQuestion, shuffleOpts: boolean): Question {
+  const answer = item.options[item.answer]!;
+  return {
+    muscleId: `exam-${item.id}`,
+    examId: item.id,
+    kind: "exam",
+    prompt: item.promptHe,
+    promptEn: item.promptEn,
+    answer,
+    options: shuffleOpts ? shuffle([...item.options]) : [...item.options],
+  };
+}
+
+function buildExamQuestion(): Question {
+  const item = EXAM_QUESTIONS[Math.floor(Math.random() * EXAM_QUESTIONS.length)]!;
+  return examToQuestion(item, true);
+}
+
 function tryBuild(kind: Kind, filter: QuizFilter): Question | null {
+  if (kind === "exam") {
+    return buildExamQuestion();
+  }
+
   if (kind === "plane") {
     const gym = allGymMoves();
     if (gym.length > 0 && Math.random() < 0.55) {
@@ -425,6 +457,9 @@ export function Quiz() {
   const [picked, setPicked] = useState<string | null>(null);
   const [score, setScore] = useState({ ok: 0, n: 0 });
   const [ready, setReady] = useState(false);
+  const [examIndex, setExamIndex] = useState(0);
+  const [examFinished, setExamFinished] = useState(false);
+  const examMode = group === "exam";
 
   const filter = useMemo(
     () => computeFilter(group, region, familyId, topic, landmarkRegion),
@@ -434,9 +469,15 @@ export function Quiz() {
   useEffect(() => {
     setPicked(null);
     setScore({ ok: 0, n: 0 });
-    setQ(buildQuestion(filter));
+    setExamIndex(0);
+    setExamFinished(false);
+    if (group === "exam") {
+      setQ(examToQuestion(EXAM_QUESTIONS[0]!, false));
+    } else {
+      setQ(buildQuestion(filter));
+    }
     setReady(true);
-  }, [filter]);
+  }, [filter, group]);
 
   function choose(option: string) {
     if (picked || !q) return;
@@ -449,7 +490,26 @@ export function Quiz() {
 
   function next() {
     setPicked(null);
+    if (examMode) {
+      const nextI = examIndex + 1;
+      if (nextI >= EXAM_QUESTIONS.length) {
+        setExamFinished(true);
+        setQ(null);
+        return;
+      }
+      setExamIndex(nextI);
+      setQ(examToQuestion(EXAM_QUESTIONS[nextI]!, false));
+      return;
+    }
     setQ(buildQuestion(filter));
+  }
+
+  function restartExam() {
+    setPicked(null);
+    setScore({ ok: 0, n: 0 });
+    setExamIndex(0);
+    setExamFinished(false);
+    setQ(examToQuestion(EXAM_QUESTIONS[0]!, false));
   }
 
   function selectGroup(nextGroup: QuizGroup) {
@@ -466,6 +526,7 @@ export function Quiz() {
   const showLandmarkRegions = group === "landmark";
   const correct = picked === q?.answer;
   const pct = score.n ? Math.round((score.ok / score.n) * 100) : 0;
+  const lastExamQuestion = examMode && examIndex === EXAM_QUESTIONS.length - 1;
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -478,6 +539,7 @@ export function Quiz() {
             {GROUPS.map((g) => (
               <FilterChip key={g.id} active={group === g.id} onClick={() => selectGroup(g.id)}>
                 {g.en} · {g.he}
+                {g.id === "exam" ? ` (${EXAM_QUESTIONS.length})` : ""}
               </FilterChip>
             ))}
           </div>
@@ -588,7 +650,11 @@ export function Quiz() {
           {score.n > 0 && <span> ({pct}%)</span>}
         </p>
         <p className="text-xs text-[var(--ink-soft)]">
-          Exam-style questions · שאלות בסגנון מבחן · Origin / landmarks / glossary
+          {examMode
+            ? examFinished
+              ? `Finished · הסתיים · ${EXAM_QUESTIONS.length} questions`
+              : `Question ${examIndex + 1} of ${EXAM_QUESTIONS.length} · שאלה ${examIndex + 1} מתוך ${EXAM_QUESTIONS.length}`
+            : "Exam-style questions · שאלות בסגנון מבחן · Origin / landmarks / glossary"}
         </p>
       </div>
 
@@ -596,22 +662,46 @@ export function Quiz() {
         <div className="rounded-3xl border border-[var(--line)] bg-[var(--card)] p-8 text-center text-sm text-[var(--ink-soft)]">
           Loading a question… · טוען שאלה…
         </div>
+      ) : examFinished ? (
+        <div className="rounded-3xl border border-[var(--line)] bg-[var(--card)] p-8 text-center shadow-sm">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
+            Practice exam · מבחן לדוגמה
+          </p>
+          <h2 className="mt-2 text-2xl font-bold">Done · הסתיים</h2>
+          <p className="mt-3 text-lg">
+            <span className="font-bold">{score.ok}</span> / {EXAM_QUESTIONS.length}
+            <span className="text-[var(--ink-soft)]"> ({pct}%)</span>
+          </p>
+          <button
+            type="button"
+            onClick={restartExam}
+            className="mt-6 rounded-full bg-[var(--ink)] px-5 py-2 text-sm text-[var(--paper)]"
+          >
+            Start again · להתחיל מחדש
+          </button>
+        </div>
       ) : !q ? (
         <EmptyState title="No questions in this filter · אין שאלות בסינון הזה" body="Change the question type, region, or muscle family. · שנו את סוג השאלה, האזור או קבוצת השרירים." />
       ) : (
         <div className="rounded-3xl border border-[var(--line)] bg-[var(--card)] p-5 shadow-sm md:p-7">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
-            {q.kind}
+            {q.kind === "exam"
+              ? `Practice exam · מבחן לדוגמה${q.examId ? ` · ${q.examId}/${EXAM_QUESTIONS.length}` : ""}`
+              : q.kind}
           </p>
           <h2 className="mt-2 text-lg font-bold leading-snug md:text-xl">{q.prompt}</h2>
+          {q.promptEn && (
+            <p className="mt-1 text-sm leading-relaxed text-[var(--ink-soft)]">{q.promptEn}</p>
+          )}
           {(q.kind === "picture" || q.kind === "landmark-pic") && <QuizPicture q={q} />}
           <div className="mt-5 grid gap-2">
-            {q.options.map((opt) => {
+            {q.options.map((opt, i) => {
               const isPick = picked === opt;
               const isAnswer = opt === q.answer;
+              const letter = q.kind === "exam" ? OPTION_LETTERS[i] : null;
               return (
                 <button
-                  key={opt}
+                  key={`${i}-${opt}`}
                   type="button"
                   onClick={() => choose(opt)}
                   className={cn(
@@ -622,22 +712,29 @@ export function Quiz() {
                     picked && !isAnswer && !isPick && "border-[var(--line)] opacity-50",
                   )}
                 >
-                  {opt}
+                  {letter ? (
+                    <span>
+                      <span className="font-bold">{letter}. </span>
+                      {opt}
+                    </span>
+                  ) : (
+                    opt
+                  )}
                 </button>
               );
             })}
           </div>
           {picked && (
-            <div className="mt-5 flex items-center justify-between">
+            <div className="mt-5 flex items-center justify-between gap-3">
               <p className={cn("text-sm font-semibold", correct ? "text-emerald-800" : "text-red-800")}>
                 {correct ? "Correct · נכון" : "Not quite — the answer is in green · לא מדויק — התשובה מסומנת בירוק"}
               </p>
               <button
                 type="button"
                 onClick={next}
-                className="rounded-full bg-[var(--ink)] px-5 py-2 text-sm text-[var(--paper)]"
+                className="shrink-0 rounded-full bg-[var(--ink)] px-5 py-2 text-sm text-[var(--paper)]"
               >
-                Next question · שאלה הבאה
+                {lastExamQuestion ? "See score · לציון" : "Next question · שאלה הבאה"}
               </button>
             </div>
           )}
