@@ -86,12 +86,12 @@ export function StudyApp() {
               </h1>
               <p className="mt-1 max-w-2xl text-sm text-[var(--ink-soft)]">
                 Origin, Insertion, and Action for every muscle — deduce movement in{" "}
-                <span className="term">Why · היגיון</span>, and memorize attachments in{" "}
+                <span className="term">Why · היגיון</span>, and memorize attachments and heads in{" "}
                 <span className="term">Memorize · שינון</span>.
               </p>
               <p className="mt-1 max-w-2xl text-sm text-[var(--ink-soft)]">
                 טבלת Origin, Insertion ו־Action לכל שריר — בלשונית «היגיון» איך להסיק
-                תנועה, ובלשונית «שינון» קיצורים לאחיזות.
+                תנועה, ובלשונית «שינון» ראשים, חלקים וקיצורים לאחיזות.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--ink-soft)]">
@@ -153,7 +153,7 @@ export function StudyApp() {
                     : tab === "landmarks" || (tab === "cards" && cardDeck === "landmarks")
                       ? "Search a landmark: acromion, ASIS, זיז, גומה…"
                       : tab === "memorize" || (tab === "cards" && cardDeck === "hooks")
-                      ? "Search: hip flexors, SITS, PFPF, pes, CAS, coracoid…"
+                      ? "Search: deltoid, long head, hip flexors, SITS, PFPF, pes, CAS, coracoid…"
                       : "Search muscle, bone, origin, insertion, action, SITS, PFPF… · חיפוש שריר, עצם, origin, או קיצור שינון…"
                 }
                 className="w-full rounded-xl border border-[var(--line)] bg-[var(--card)] py-2.5 pr-10 pl-3 text-sm outline-none ring-[var(--accent-2)] focus:ring-2"

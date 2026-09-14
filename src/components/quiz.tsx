@@ -13,12 +13,33 @@ import {
 import { bilingual } from "@/components/name-pair";
 import { AnatomyThumb } from "@/components/anatomy-image";
 import { EmptyState } from "@/components/muscle-table";
-import { ACTIONS, FAMILIES, PLANES, allGymMoves, planeById } from "@/data/planes";
+import { ACTIONS, FAMILIES, PLANES, actionById, allGymMoves, planeById } from "@/data/planes";
 import { OI_HOOKS, hooksForRegion, type OiHook } from "@/data/oi-mnemonics";
-import { EXAM_QUESTIONS, OPTION_LETTERS, type ExamQuestion } from "@/data/exam-questions";
+import {
+  EXAM_QUESTIONS,
+  OPTION_LETTERS,
+  REVIEW_QUESTIONS,
+  type ExamQuestion,
+} from "@/data/exam-questions";
+import {
+  TISSUE_QUESTIONS,
+  TISSUE_TOPICS,
+  filterReviewQuestions,
+  reviewFormatLabel,
+  type ReviewFormat,
+  type ReviewQuestion,
+} from "@/data/review-questions";
+import {
+  MUSCLE_PARTS,
+  originLabel,
+  partLabel,
+  splitsForRegion,
+  type SplitMuscle,
+} from "@/data/muscle-parts";
 import { REGIONS, type RegionId } from "@/data/regions";
 import { cn } from "@/lib/utils";
 import type { Muscle } from "@/data/types";
+
 
 type Kind =
   | "origin"
@@ -32,9 +53,21 @@ type Kind =
   | "term"
   | "landmark"
   | "landmark-pic"
-  | "exam";
+  | "exam"
+  | "parts";
 
-type QuizGroup = "all" | "exam" | "muscles" | "family" | "hook" | "plane" | "term" | "landmark";
+type QuizGroup =
+  | "all"
+  | "exam"
+  | "review"
+  | "tissues"
+  | "muscles"
+  | "family"
+  | "hook"
+  | "plane"
+  | "term"
+  | "landmark"
+  | "parts";
 
 type Question = {
   muscleId: string;
@@ -45,7 +78,34 @@ type Question = {
   options: string[];
   landmarkId?: string;
   examId?: number;
+  explainHe?: string;
+  explainEn?: string;
+  topic?: string;
+  source?: "exam" | "contraction" | "tissues";
+  format?: ReviewFormat;
 };
+
+const TISSUE_AMERICAN_BANK: ExamQuestion[] = TISSUE_QUESTIONS.filter(
+  (q): q is ReviewQuestion & { options: [string, string, string, string]; answer: 0 | 1 | 2 | 3 } =>
+    q.format === "american" && q.options != null && q.answer != null,
+).map((q) => ({
+  id: 200 + q.bookletId,
+  promptHe: q.promptHe,
+  promptEn: q.promptEn,
+  options: q.options,
+  answer: q.answer,
+  topic: q.topic,
+  source: "tissues",
+}));
+
+const ALL_BANK_QUESTIONS = [...EXAM_QUESTIONS, ...REVIEW_QUESTIONS, ...TISSUE_AMERICAN_BANK];
+const REVIEW_IDS = new Set(REVIEW_QUESTIONS.map((q) => q.id));
+
+function bankForGroup(group: QuizGroup): ExamQuestion[] {
+  if (group === "exam") return EXAM_QUESTIONS;
+  if (group === "review") return REVIEW_QUESTIONS;
+  return ALL_BANK_QUESTIONS;
+}
 
 type QuizFilter = {
   kinds: Kind[];
@@ -54,6 +114,8 @@ type QuizFilter = {
   hooks: OiHook[];
   terms: typeof dictionaryTerms;
   landmarks: Landmark[];
+  splits: SplitMuscle[];
+  examBank: ExamQuestion[];
 };
 
 const MUSCLE_KINDS: Kind[] = ["origin", "insertion", "action", "name", "picture"];
@@ -63,11 +125,15 @@ const PLANE_KINDS: Kind[] = ["plane"];
 const TERM_KINDS: Kind[] = ["term"];
 const LANDMARK_KINDS: Kind[] = ["landmark", "landmark-pic"];
 const EXAM_KINDS: Kind[] = ["exam"];
+const PARTS_KINDS: Kind[] = ["parts"];
 
 const GROUPS: { id: QuizGroup; en: string; he: string }[] = [
   { id: "all", en: "All", he: "הכל" },
   { id: "exam", en: "Practice exam", he: "מבחן לדוגמה" },
+  { id: "review", en: "Contraction review", he: "חזרה — כיווץ" },
+  { id: "tissues", en: "Tissues", he: "רקמות" },
   { id: "muscles", en: "Muscles", he: "שרירים" },
+  { id: "parts", en: "Heads / parts", he: "ראשים וחלקים" },
   { id: "family", en: "Families", he: "קבוצות" },
   { id: "hook", en: "Memory hooks", he: "קיצורי שינון" },
   { id: "plane", en: "Planes", he: "מישורים" },
@@ -147,15 +213,24 @@ function computeFilter(
   }
 
   const hooks = hooksForRegion(region);
+  const poolIds = new Set(pool.map((m) => m.id));
+  const splits = splitsForRegion(region).filter(
+    (s) => poolIds.size === 0 || poolIds.has(s.id) || group === "parts",
+  );
 
   const familySelected = familyId !== "all";
   let kinds: Kind[];
   switch (group) {
     case "exam":
+    case "review":
+    case "tissues":
       kinds = EXAM_KINDS;
       break;
     case "muscles":
       kinds = MUSCLE_KINDS;
+      break;
+    case "parts":
+      kinds = PARTS_KINDS;
       break;
     case "family":
       kinds = FAMILY_KINDS;
@@ -176,10 +251,11 @@ function computeFilter(
       if (familySelected) {
         kinds = MUSCLE_KINDS;
       } else if (region !== "all") {
-        kinds = [...MUSCLE_KINDS, ...FAMILY_KINDS, ...HOOK_KINDS, ...LANDMARK_KINDS];
+        kinds = [...MUSCLE_KINDS, ...PARTS_KINDS, ...FAMILY_KINDS, ...HOOK_KINDS, ...LANDMARK_KINDS];
       } else {
         kinds = [
           ...MUSCLE_KINDS,
+          ...PARTS_KINDS,
           ...FAMILY_KINDS,
           ...HOOK_KINDS,
           ...PLANE_KINDS,
@@ -190,7 +266,101 @@ function computeFilter(
       }
   }
 
-  return { kinds, muscles: pool, families, hooks, terms, landmarks: landmarkPool };
+  return { kinds, muscles: pool, families, hooks, terms, landmarks: landmarkPool, splits, examBank: bankForGroup(group) };
+}
+
+function uniquePartActions(muscle: SplitMuscle, part: SplitMuscle["parts"][number]) {
+  if (part.quizActions?.length) return part.quizActions;
+  return part.actions.filter((a) => !muscle.sharedActions.includes(a));
+}
+
+function fourOptions(answer: string, extras: string[]): string[] | null {
+  const uniq = extras.filter((x, i, arr) => x !== answer && x.length > 0 && arr.indexOf(x) === i);
+  if (uniq.length < 3) return null;
+  return shuffle([answer, ...shuffle(uniq).slice(0, 3)]);
+}
+
+function buildPartsQuestion(pool: SplitMuscle[]): Question | null {
+  if (pool.length === 0) return null;
+  const muscle = pool[Math.floor(Math.random() * pool.length)]!;
+  const part = muscle.parts[Math.floor(Math.random() * muscle.parts.length)]!;
+  const unique = uniquePartActions(muscle, part);
+  const extraJointHeads = muscle.parts.filter((p) => p.extraJoint);
+  const onlyJointHeads = muscle.parts.filter((p) => !p.extraJoint);
+
+  const styles: Array<"origin" | "name-from-origin" | "action" | "joint"> = ["origin", "name-from-origin"];
+  if (unique.length > 0) styles.push("action");
+  if (extraJointHeads.length === 1 && onlyJointHeads.length > 0) styles.push("joint");
+
+  const style = styles[Math.floor(Math.random() * styles.length)]!;
+  const allOrigins = MUSCLE_PARTS.flatMap((m) => m.parts.map(originLabel));
+  const allPartNames = MUSCLE_PARTS.flatMap((m) => m.parts.map((p) => partLabel(m, p)));
+
+  if (style === "origin") {
+    const answer = originLabel(part);
+    const options = fourOptions(answer, allOrigins);
+    if (!options) return null;
+    return {
+      muscleId: muscle.id,
+      kind: "parts",
+      prompt: `What is the origin of the ${part.nameEn} of ${muscle.nameEn}? · מה ה־Origin של ${part.nameHe} של ${muscle.nameHe}?`,
+      answer,
+      options,
+    };
+  }
+
+  if (style === "name-from-origin") {
+    const answer = partLabel(muscle, part);
+    const options = fourOptions(answer, allPartNames);
+    if (!options) return null;
+    return {
+      muscleId: muscle.id,
+      kind: "parts",
+      prompt: `Which head / part starts here: ${originLabel(part)}? · איזה ראש / חלק מתחיל כאן: ${originLabel(part)}?`,
+      answer,
+      options,
+    };
+  }
+
+  if (style === "action") {
+    const actionId = unique[Math.floor(Math.random() * unique.length)]!;
+    const action = actionById(actionId);
+    if (!action) return null;
+    const answer = bilingual(part.nameEn, part.nameHe);
+    const siblingNames = muscle.parts.map((p) => bilingual(p.nameEn, p.nameHe));
+    const pad = [
+      "All parts equally · כל החלקים באותה מידה",
+      ...MUSCLE_PARTS.filter((m) => m.id !== muscle.id).flatMap((m) =>
+        m.parts.map((p) => bilingual(p.nameEn, p.nameHe)),
+      ),
+    ];
+    const options = fourOptions(answer, [...siblingNames, ...pad]);
+    if (!options) return null;
+    return {
+      muscleId: muscle.id,
+      kind: "parts",
+      prompt: `Which part of ${bilingual(muscle.nameEn, muscle.nameHe)} is the main one for ${bilingual(action.en, action.he)}? · איזה חלק של ${bilingual(muscle.nameEn, muscle.nameHe)} אחראי בעיקר ל־${bilingual(action.en, action.he)}?`,
+      answer,
+      options,
+    };
+  }
+
+  const winner = extraJointHeads[0]!;
+  const answer = bilingual(winner.nameEn, winner.nameHe);
+  const siblingNames = muscle.parts.map((p) => bilingual(p.nameEn, p.nameHe));
+  const options = fourOptions(answer, [
+    ...siblingNames,
+    "All heads equally · כל הראשים באותה מידה",
+    "Neither head · אף ראש לא",
+  ]);
+  if (!options) return null;
+  return {
+    muscleId: muscle.id,
+    kind: "parts",
+    prompt: `Which head of ${bilingual(muscle.nameEn, muscle.nameHe)} also crosses an extra joint? · איזה ראש של ${bilingual(muscle.nameEn, muscle.nameHe)} חוצה גם מפרק נוסף?`,
+    answer,
+    options,
+  };
 }
 
 function muscleDistractors(muscle: Muscle, pool: Muscle[]) {
@@ -314,6 +484,7 @@ function buildTermQuestion(pool: typeof dictionaryTerms): Question | null {
 
 function examToQuestion(item: ExamQuestion, shuffleOpts: boolean): Question {
   const answer = item.options[item.answer]!;
+  const source = item.source ?? (REVIEW_IDS.has(item.id) ? "contraction" : "exam");
   return {
     muscleId: `exam-${item.id}`,
     examId: item.id,
@@ -322,17 +493,56 @@ function examToQuestion(item: ExamQuestion, shuffleOpts: boolean): Question {
     promptEn: item.promptEn,
     answer,
     options: shuffleOpts ? shuffle([...item.options]) : [...item.options],
+    explainHe: item.explainHe,
+    explainEn: item.explainEn,
+    topic: item.topic ?? (source === "contraction" ? "תהליך הכיווץ" : undefined),
+    source,
+    format: "american",
   };
 }
 
-function buildExamQuestion(): Question {
-  const item = EXAM_QUESTIONS[Math.floor(Math.random() * EXAM_QUESTIONS.length)]!;
+function tissueToQuestion(item: ReviewQuestion, shuffleOpts: boolean): Question {
+  if (item.format === "american" && item.options && item.answer != null) {
+    const answer = item.options[item.answer]!;
+    return {
+      muscleId: `tissue-${item.id}`,
+      examId: 200 + item.bookletId,
+      kind: "exam",
+      prompt: item.promptHe,
+      promptEn: item.promptEn,
+      answer,
+      options: shuffleOpts ? shuffle([...item.options]) : [...item.options],
+      explainHe: item.explainHe,
+      explainEn: item.explainEn,
+      topic: item.topic,
+      source: "tissues",
+      format: "american",
+    };
+  }
+  return {
+    muscleId: `tissue-${item.id}`,
+    examId: item.bookletId,
+    kind: "exam",
+    prompt: item.promptHe,
+    promptEn: item.promptEn,
+    answer: item.answerHe ?? "",
+    options: [],
+    explainHe: item.answerHe,
+    explainEn: item.answerEn,
+    topic: item.topic,
+    source: "tissues",
+    format: "open",
+  };
+}
+
+function buildExamQuestion(bank: ExamQuestion[]): Question {
+  const item = bank[Math.floor(Math.random() * bank.length)]!;
   return examToQuestion(item, true);
 }
 
 function tryBuild(kind: Kind, filter: QuizFilter): Question | null {
   if (kind === "exam") {
-    return buildExamQuestion();
+    return buildExamQuestion(filter.examBank);
   }
 
   if (kind === "plane") {
@@ -391,6 +601,10 @@ function tryBuild(kind: Kind, filter: QuizFilter): Question | null {
 
   if (kind === "hook") {
     return buildHookQuestion(filter.hooks);
+  }
+
+  if (kind === "parts") {
+    return buildPartsQuestion(filter.splits);
   }
 
   const pictured = filter.muscles.filter((m) => anatomyImage("muscles", m.id));
@@ -453,13 +667,24 @@ export function Quiz() {
   const [familyId, setFamilyId] = useState<string | "all">("all");
   const [topic, setTopic] = useState<string | "all">("all");
   const [landmarkRegion, setLandmarkRegion] = useState<LandmarkRegionId | "all">("all");
+  const [tissueFormat, setTissueFormat] = useState<ReviewFormat | "all">("all");
+  const [tissueTopic, setTissueTopic] = useState<string | "all">("all");
   const [q, setQ] = useState<Question | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
+  const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState({ ok: 0, n: 0 });
   const [ready, setReady] = useState(false);
   const [examIndex, setExamIndex] = useState(0);
   const [examFinished, setExamFinished] = useState(false);
-  const examMode = group === "exam";
+
+  const tissueBank = useMemo(
+    () => filterReviewQuestions(tissueFormat, tissueTopic),
+    [tissueFormat, tissueTopic],
+  );
+  const sequentialBank = group === "exam" || group === "review" ? bankForGroup(group) : null;
+  const tissueMode = group === "tissues";
+  const examMode = sequentialBank !== null || tissueMode;
+  const sequentialLength = tissueMode ? tissueBank.length : sequentialBank?.length ?? 0;
 
   const filter = useMemo(
     () => computeFilter(group, region, familyId, topic, landmarkRegion),
@@ -468,16 +693,20 @@ export function Quiz() {
 
   useEffect(() => {
     setPicked(null);
+    setRevealed(false);
     setScore({ ok: 0, n: 0 });
     setExamIndex(0);
     setExamFinished(false);
-    if (group === "exam") {
-      setQ(examToQuestion(EXAM_QUESTIONS[0]!, false));
+    if (group === "exam" || group === "review") {
+      const bank = bankForGroup(group);
+      setQ(examToQuestion(bank[0]!, false));
+    } else if (group === "tissues") {
+      setQ(tissueBank[0] ? tissueToQuestion(tissueBank[0], false) : null);
     } else {
       setQ(buildQuestion(filter));
     }
     setReady(true);
-  }, [filter, group]);
+  }, [filter, group, tissueBank]);
 
   function choose(option: string) {
     if (picked || !q) return;
@@ -488,17 +717,38 @@ export function Quiz() {
     }));
   }
 
+  function markOpen(knew: boolean) {
+    if (picked || !q) return;
+    setPicked(knew ? q.answer : "__miss__");
+    setScore((s) => ({
+      ok: s.ok + (knew ? 1 : 0),
+      n: s.n + 1,
+    }));
+  }
+
   function next() {
     setPicked(null);
-    if (examMode) {
+    setRevealed(false);
+    if (tissueMode) {
       const nextI = examIndex + 1;
-      if (nextI >= EXAM_QUESTIONS.length) {
+      if (nextI >= tissueBank.length) {
         setExamFinished(true);
         setQ(null);
         return;
       }
       setExamIndex(nextI);
-      setQ(examToQuestion(EXAM_QUESTIONS[nextI]!, false));
+      setQ(tissueToQuestion(tissueBank[nextI]!, false));
+      return;
+    }
+    if (sequentialBank) {
+      const nextI = examIndex + 1;
+      if (nextI >= sequentialBank.length) {
+        setExamFinished(true);
+        setQ(null);
+        return;
+      }
+      setExamIndex(nextI);
+      setQ(examToQuestion(sequentialBank[nextI]!, false));
       return;
     }
     setQ(buildQuestion(filter));
@@ -506,10 +756,16 @@ export function Quiz() {
 
   function restartExam() {
     setPicked(null);
+    setRevealed(false);
     setScore({ ok: 0, n: 0 });
     setExamIndex(0);
     setExamFinished(false);
-    setQ(examToQuestion(EXAM_QUESTIONS[0]!, false));
+    if (tissueMode) {
+      setQ(tissueBank[0] ? tissueToQuestion(tissueBank[0], false) : null);
+      return;
+    }
+    if (!sequentialBank) return;
+    setQ(examToQuestion(sequentialBank[0]!, false));
   }
 
   function selectGroup(nextGroup: QuizGroup) {
@@ -518,15 +774,40 @@ export function Quiz() {
     setFamilyId("all");
     setTopic("all");
     setLandmarkRegion("all");
+    setTissueFormat("all");
+    setTissueTopic("all");
   }
 
-  const showRegions = group === "all" || group === "muscles" || group === "family" || group === "hook";
+  const showRegions = group === "all" || group === "muscles" || group === "family" || group === "hook" || group === "parts";
   const showFamilies = group === "all" || group === "muscles";
   const showTopics = group === "term";
   const showLandmarkRegions = group === "landmark";
+  const showTissueFilters = group === "tissues";
   const correct = picked === q?.answer;
   const pct = score.n ? Math.round((score.ok / score.n) * 100) : 0;
-  const lastExamQuestion = examMode && examIndex === EXAM_QUESTIONS.length - 1;
+  const lastExamQuestion = examMode && sequentialLength > 0 && examIndex === sequentialLength - 1;
+  const sequentialLabel = tissueMode
+    ? "Tissues · רקמות"
+    : group === "review"
+      ? "Contraction review · חזרה — כיווץ"
+      : "Practice exam · מבחן לדוגמה";
+  const isReviewItem = q?.source === "contraction" || (q?.examId != null && REVIEW_IDS.has(q.examId));
+  const examBadge = q
+    ? q.source === "tissues" || group === "tissues"
+      ? [
+          "Tissues · רקמות",
+          q.format ? (q.format === "open" ? "Open · פתוחה" : "American · אמריקאית") : null,
+          q.topic ? topicLabel(q.topic) : null,
+          tissueMode && sequentialLength ? `${examIndex + 1}/${sequentialLength}` : null,
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : q.kind === "exam"
+        ? isReviewItem || group === "review"
+          ? `Contraction review · חזרה — כיווץ${q.examId && sequentialBank ? ` · ${examIndex + 1}/${sequentialBank.length}` : ""}`
+          : `Practice exam · מבחן לדוגמה${q.examId ? ` · ${q.examId}/${EXAM_QUESTIONS.length}` : ""}`
+        : q.kind
+    : null;
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -540,6 +821,8 @@ export function Quiz() {
               <FilterChip key={g.id} active={group === g.id} onClick={() => selectGroup(g.id)}>
                 {g.en} · {g.he}
                 {g.id === "exam" ? ` (${EXAM_QUESTIONS.length})` : ""}
+                {g.id === "review" ? ` (${REVIEW_QUESTIONS.length})` : ""}
+                {g.id === "tissues" ? ` (${TISSUE_QUESTIONS.length})` : ""}
               </FilterChip>
             ))}
           </div>
@@ -613,6 +896,53 @@ export function Quiz() {
           </div>
         )}
 
+        {showTissueFilters && (
+          <>
+            <div>
+              <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-soft)]">
+                Format · סוג שאלה
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                <FilterChip active={tissueFormat === "all"} onClick={() => setTissueFormat("all")}>
+                  All · הכל ({TISSUE_QUESTIONS.length})
+                </FilterChip>
+                <FilterChip active={tissueFormat === "open"} onClick={() => setTissueFormat("open")}>
+                  {reviewFormatLabel("open")} (
+                  {TISSUE_QUESTIONS.filter((x) => x.format === "open").length})
+                </FilterChip>
+                <FilterChip
+                  active={tissueFormat === "american"}
+                  onClick={() => setTissueFormat("american")}
+                >
+                  {reviewFormatLabel("american")} (
+                  {TISSUE_QUESTIONS.filter((x) => x.format === "american").length})
+                </FilterChip>
+              </div>
+            </div>
+            <div>
+              <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-soft)]">
+                Category · קטגוריה
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                <FilterChip active={tissueTopic === "all"} onClick={() => setTissueTopic("all")}>
+                  All · הכל
+                </FilterChip>
+                {TISSUE_TOPICS.map((tp) => {
+                  const n = TISSUE_QUESTIONS.filter(
+                    (x) =>
+                      x.topic === tp && (tissueFormat === "all" || x.format === tissueFormat),
+                  ).length;
+                  if (n === 0) return null;
+                  return (
+                    <FilterChip key={tp} active={tissueTopic === tp} onClick={() => setTissueTopic(tp)}>
+                      {topicLabel(tp)} ({n})
+                    </FilterChip>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        )}
         {showLandmarkRegions && (
           <div>
             <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-soft)]">
@@ -652,8 +982,8 @@ export function Quiz() {
         <p className="text-xs text-[var(--ink-soft)]">
           {examMode
             ? examFinished
-              ? `Finished · הסתיים · ${EXAM_QUESTIONS.length} questions`
-              : `Question ${examIndex + 1} of ${EXAM_QUESTIONS.length} · שאלה ${examIndex + 1} מתוך ${EXAM_QUESTIONS.length}`
+              ? `Finished · הסתיים · ${sequentialLength} questions`
+              : `Question ${examIndex + 1} of ${sequentialLength} · שאלה ${examIndex + 1} מתוך ${sequentialLength}`
             : "Exam-style questions · שאלות בסגנון מבחן · Origin / landmarks / glossary"}
         </p>
       </div>
@@ -662,14 +992,14 @@ export function Quiz() {
         <div className="rounded-3xl border border-[var(--line)] bg-[var(--card)] p-8 text-center text-sm text-[var(--ink-soft)]">
           Loading a question… · טוען שאלה…
         </div>
-      ) : examFinished ? (
+      ) : examFinished && examMode ? (
         <div className="rounded-3xl border border-[var(--line)] bg-[var(--card)] p-8 text-center shadow-sm">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
-            Practice exam · מבחן לדוגמה
+            {sequentialLabel}
           </p>
           <h2 className="mt-2 text-2xl font-bold">Done · הסתיים</h2>
           <p className="mt-3 text-lg">
-            <span className="font-bold">{score.ok}</span> / {EXAM_QUESTIONS.length}
+            <span className="font-bold">{score.ok}</span> / {sequentialLength}
             <span className="text-[var(--ink-soft)]"> ({pct}%)</span>
           </p>
           <button
@@ -685,15 +1015,67 @@ export function Quiz() {
       ) : (
         <div className="rounded-3xl border border-[var(--line)] bg-[var(--card)] p-5 shadow-sm md:p-7">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)]">
-            {q.kind === "exam"
-              ? `Practice exam · מבחן לדוגמה${q.examId ? ` · ${q.examId}/${EXAM_QUESTIONS.length}` : ""}`
-              : q.kind}
+            {examBadge}
           </p>
           <h2 className="mt-2 text-lg font-bold leading-snug md:text-xl">{q.prompt}</h2>
           {q.promptEn && (
             <p className="mt-1 text-sm leading-relaxed text-[var(--ink-soft)]">{q.promptEn}</p>
           )}
           {(q.kind === "picture" || q.kind === "landmark-pic") && <QuizPicture q={q} />}
+          {q.format === "open" ? (
+            <div className="mt-5 space-y-3">
+              {!revealed ? (
+                <button
+                  type="button"
+                  onClick={() => setRevealed(true)}
+                  className="rounded-full bg-[var(--ink)] px-5 py-2 text-sm text-[var(--paper)]"
+                >
+                  Reveal answer · חשפו תשובה
+                </button>
+              ) : (
+                <>
+                  <div className="whitespace-pre-line rounded-xl border border-emerald-700 bg-emerald-50 px-4 py-3 text-right text-sm leading-relaxed">
+                    {q.explainHe ?? q.answer}
+                    {q.explainEn && (
+                      <span className="term mt-2 block text-xs text-[var(--ink-soft)]">{q.explainEn}</span>
+                    )}
+                  </div>
+                  {!picked ? (
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => markOpen(true)}
+                        className="rounded-full border border-emerald-700 px-4 py-2 text-sm font-medium text-emerald-800"
+                      >
+                        I knew it · ידעתי
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => markOpen(false)}
+                        className="rounded-full border border-[var(--line)] px-4 py-2 text-sm font-medium text-[var(--ink-soft)]"
+                      >
+                        Not quite · לא מדויק
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-3">
+                      <p className={cn("text-sm font-semibold", correct ? "text-emerald-800" : "text-red-800")}>
+                        {correct ? "Correct · נכון" : "Review the answer above · עברו על התשובה למעלה"}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={next}
+                        className="shrink-0 rounded-full bg-[var(--ink)] px-5 py-2 text-sm text-[var(--paper)]"
+                      >
+                        {lastExamQuestion ? "See score · לציון" : "Next question · שאלה הבאה"}
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          ) : (
+            <>
           <div className="mt-5 grid gap-2">
             {q.options.map((opt, i) => {
               const isPick = picked === opt;
@@ -725,10 +1107,19 @@ export function Quiz() {
             })}
           </div>
           {picked && (
-            <div className="mt-5 flex items-center justify-between gap-3">
-              <p className={cn("text-sm font-semibold", correct ? "text-emerald-800" : "text-red-800")}>
-                {correct ? "Correct · נכון" : "Not quite — the answer is in green · לא מדויק — התשובה מסומנת בירוק"}
-              </p>
+            <div className="mt-5 space-y-3">
+              {(q.explainHe || q.explainEn) && (
+                <p className="rounded-xl bg-[var(--paper)] px-4 py-3 text-sm leading-relaxed text-[var(--ink-soft)]">
+                  {q.explainHe}
+                  {q.explainEn && (
+                    <span className="term mt-1 block text-xs">{q.explainEn}</span>
+                  )}
+                </p>
+              )}
+              <div className="flex items-center justify-between gap-3">
+                <p className={cn("text-sm font-semibold", correct ? "text-emerald-800" : "text-red-800")}>
+                  {correct ? "Correct · נכון" : "Not quite — the answer is in green · לא מדויק — התשובה מסומנת בירוק"}
+                </p>
               <button
                 type="button"
                 onClick={next}
@@ -736,7 +1127,10 @@ export function Quiz() {
               >
                 {lastExamQuestion ? "See score · לציון" : "Next question · שאלה הבאה"}
               </button>
+              </div>
             </div>
+          )}
+            </>
           )}
         </div>
       )}

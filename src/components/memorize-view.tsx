@@ -13,6 +13,7 @@ import { REGIONS, REGION_COLORS, type RegionId } from "@/data/regions";
 import { AnatomyThumb } from "@/components/anatomy-image";
 import { EmptyState } from "@/components/muscle-table";
 import { ActionGroupsView } from "@/components/action-groups";
+import { MusclePartsView } from "@/components/muscle-parts";
 import { bilingual, NamePair } from "@/components/name-pair";
 import { cn } from "@/lib/utils";
 
@@ -60,11 +61,23 @@ export function MemorizeView({
   region: RegionId | "all";
   query: string;
 }) {
-  const [page, setPage] = useState<"movements" | "attachments">("movements");
+  const [page, setPage] = useState<"heads" | "movements" | "attachments">("heads");
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-1.5">
+        <button
+          type="button"
+          onClick={() => setPage("heads")}
+          className={cn(
+            "rounded-full border px-3 py-1.5 text-sm font-medium transition",
+            page === "heads"
+              ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
+              : "border-[var(--line)] bg-[var(--card)] text-[var(--ink-soft)] hover:border-[var(--ink)]",
+          )}
+        >
+          Heads / parts · ראשים וחלקים
+        </button>
         <button
           type="button"
           onClick={() => setPage("movements")}
@@ -90,7 +103,9 @@ export function MemorizeView({
           Origin / Insertion · אחיזות
         </button>
       </div>
-      {page === "movements" ? (
+      {page === "heads" ? (
+        <MusclePartsView region={region} query={query} />
+      ) : page === "movements" ? (
         <ActionGroupsView region={region} query={query} />
       ) : (
         <AttachmentTips region={region} query={query} />

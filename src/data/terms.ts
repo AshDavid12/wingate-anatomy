@@ -99,4 +99,20 @@ export const keyConcepts = [
     bodyEn:
       "Memorize the parking spot, not one muscle. CAS = trap ends / deltoid begins. PCB = coracoid. PLT = lady between two majors. PFPF = medial epicondyle. SGT = pes anserinus. PALMG = five from the pubis.",
   },
+  {
+    titleEn: "ATP muscle contraction",
+    titleHe: "כיווץ שריר ו-ATP",
+    bodyHe:
+      "כיווץ תלוי בפירוק ATP. Cross bridge = ראש מיוזין צמוד לאקטין. Power stroke = גשר הרוחב נע למרכז הסרקומר. אחר כך ניתוק ודריכה מחדש. הסידן נצמד לטרופונין ומאוחסן ברשת התעלות בשריר — לא בעצם.",
+    bodyEn:
+      "Contraction runs on ATP. Cross bridge = myosin head on actin. Power stroke = the bridge pulls toward the sarcomere center. Then detach and recock. Calcium binds troponin and is stored in the SR — not in bone.",
+  },
+  {
+    titleEn: "Gross Anatomy",
+    titleHe: "אנטומיה גסה",
+    bodyHe:
+      "אחרי פרק הרקמות (מבנה מיקרוסקופי ותגובה לעומס) באה האנטומיה הנראית לעין: שפה אנטומית, שלד ושרירים — Gross Anatomy.",
+    bodyEn:
+      "After tissues (microscopic structure and load) comes the anatomy you can see: language, skeleton, and muscles — Gross Anatomy.",
+  },
 ];

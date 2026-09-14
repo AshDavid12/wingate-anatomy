@@ -6,6 +6,10 @@ export type ExamQuestion = {
   promptEn: string;
   options: [string, string, string, string];
   answer: 0 | 1 | 2 | 3;
+  explainHe?: string;
+  explainEn?: string;
+  topic?: string;
+  source?: "exam" | "contraction" | "tissues";
 };
 
 export const EXAM_QUESTIONS: ExamQuestion[] = [
@@ -284,5 +288,88 @@ export const EXAM_QUESTIONS: ExamQuestion[] = [
     promptEn: "Which joint connects the axial skeleton to the lower appendicular skeleton?",
     options: ["Hip joint", "Pubic symphysis", "Sacroiliac joint", "Knee joint"],
     answer: 2,
+  },
+];
+
+/** Booklet review: ATP contraction. */
+export const REVIEW_QUESTIONS: ExamQuestion[] = [
+  {
+    id: 101,
+    source: "contraction",
+    topic: "תהליך הכיווץ",
+    promptHe: "לאיזה חלבון נצמד הסידן?",
+    promptEn: "Which protein does calcium bind to?",
+    options: ["טרופונין", "טרופומיוזין", "אקטין", "מיוזין"],
+    answer: 0,
+  },
+  {
+    id: 102,
+    source: "contraction",
+    topic: "תהליך הכיווץ",
+    promptHe: "איזה חלבון נמצא במרכז הסרקומר?",
+    promptEn: "Which protein sits in the center of the sarcomere?",
+    options: ["אקטין", "מיוזין", "טרופונין", "טרופומיוזין"],
+    answer: 1,
+  },
+  {
+    id: 103,
+    promptHe: "לאן נצמד ראש המיוזין?",
+    promptEn: "Where does the myosin head attach?",
+    options: ["קו ה-Z", "קו ה-M", "אתר הקשירה באקטין", "הרשתית הסרקופלסמית"],
+    answer: 2,
+  },
+  {
+    id: 104,
+    promptHe: "באיזה אברון נאגר הסידן?",
+    promptEn: "In which organelle is calcium stored?",
+    options: [
+      "בתוך העצם",
+      "רשת תעלות — Sarcoplasmic reticulum",
+      "במיטוכונדריה",
+      "בגרעין תא השריר",
+    ],
+    answer: 1,
+    explainHe: "מאגר הסידן הוא בתוך רשת התעלות בשריר, וזמין לשחרור — לא בעצם.",
+    explainEn: "Calcium is stored in the muscle's sarcoplasmic reticulum, ready to be released — not in bone.",
+  },
+  {
+    id: 105,
+    promptHe: "איזה חלבון צמוד אל ה-Z-line?",
+    promptEn: "Which protein is attached to the Z-line?",
+    options: ["מיוזין", "טרופונין", "סידן", "אקטין"],
+    answer: 3,
+  },
+  {
+    id: 106,
+    promptHe: "מהי פעולת Power stroke?",
+    promptEn: "What is the power stroke?",
+    options: [
+      "תנועה של גשר הרוחב",
+      "שחרור סידן מהעצם",
+      "ניתוק המיוזין מהאקטין",
+      "קשירת ATP לראש המיוזין",
+    ],
+    answer: 0,
+  },
+  {
+    id: 107,
+    promptHe: "המשפט «חיבור, הזזה, ניתוק» מתאים ל:",
+    promptEn: "The phrase “attach, slide, detach” belongs to:",
+    options: ["דחף עצבי", "רשת תעלות", "גשר הרוחב", "קו ה-Z"],
+    answer: 2,
+  },
+  {
+    id: 108,
+    promptHe: "איזה מהתהליכים הבאים לא מתרחש במהלך כיווץ שרירי?",
+    promptEn: "Which of the following does not occur during muscle contraction?",
+    options: [
+      "קבלת גירוי עצבי ממערכת העצבים.",
+      "שחרור סידן ממאגריו הנמצאים בתוך העצם.",
+      "יצירת חיבור בין האקטין לבין המיוזין.",
+      "תנועת פעימה של חלבון האקטין.",
+    ],
+    answer: 1,
+    explainHe: "מאגר הסידן הוא בתוך רשת התעלות בשריר, וזמין לשחרור — לא בעצם.",
+    explainEn: "Calcium is stored in the muscle's sarcoplasmic reticulum, ready to be released — not in bone.",
   },
 ];

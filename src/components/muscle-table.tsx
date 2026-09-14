@@ -13,6 +13,7 @@ import { JOINT_TAGS } from "@/data/muscle-tags";
 import { bilingual, NamePair } from "@/components/name-pair";
 import { MuscleWhyBox } from "@/components/why-view";
 import { MuscleHookBox, MuscleHookChips } from "@/components/oi-mnemonics";
+import { MusclePartsBox } from "@/components/muscle-parts";
 import { cn } from "@/lib/utils";
 
 type Hidden = { o: boolean; i: boolean; a: boolean };
@@ -151,6 +152,9 @@ export function MuscleTable({
           subtitle={open.nameHe}
         >
           <RelatedMuscles muscleId={open.id} />
+          <div className="mt-4">
+            <MusclePartsBox muscleId={open.id} />
+          </div>
           <div className="mt-4">
             <MuscleWhyBox muscleId={open.id} />
           </div>
