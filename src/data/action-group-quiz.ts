@@ -104,7 +104,6 @@ function groupRoster(g: ActionGroup): { he: string; en: string } {
 
 function outsiderPool(target: ActionGroup, universe: ActionGroup[]): ActionMember[] {
   const seen = new Set<string>();
-  const out: ActionMember[] = [];
   const same: ActionMember[] = [];
   const other: ActionMember[] = [];
   for (const g of universe) {
