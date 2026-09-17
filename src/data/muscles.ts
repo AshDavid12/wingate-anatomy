@@ -930,7 +930,7 @@ export const muscles: Muscle[] = [
   },
   {
     id: "vastus-lateralis",
-    nameHe: "רחב לטרלי",
+    nameHe: "רחב לטרלי (ראש של הארבע-ראשי)",
     nameEn: "Vastus lateralis",
     region: "thigh",
     originHe: "טרוכנטר גדול, linea aspera לטרלית ושטח אחורי-לטרלי של הירך",
@@ -946,7 +946,7 @@ export const muscles: Muscle[] = [
   },
   {
     id: "vastus-medialis",
-    nameHe: "רחב מדיאלי",
+    nameHe: "רחב מדיאלי (ראש של הארבע-ראשי)",
     nameEn: "Vastus medialis",
     region: "thigh",
     originHe: "linea aspera מדיאלית ושטח אחורי-מדיאלי של הירך",
@@ -962,7 +962,7 @@ export const muscles: Muscle[] = [
   },
   {
     id: "vastus-intermedius",
-    nameHe: "רחב ביניים",
+    nameHe: "רחב ביניים (ראש של הארבע-ראשי)",
     nameEn: "Vastus intermedius",
     region: "thigh",
     originHe: "שני שליש קדמיים של גוף הירך",
@@ -994,7 +994,7 @@ export const muscles: Muscle[] = [
   },
   {
     id: "semitendinosus",
-    nameHe: "חצי-גידי",
+    nameHe: "חצי-גידי (המסטרינג מדיאלי)",
     nameEn: "Semitendinosus",
     region: "thigh",
     originHe: "ischial tuberosity",
@@ -1010,7 +1010,7 @@ export const muscles: Muscle[] = [
   },
   {
     id: "semimembranosus",
-    nameHe: "חצי-קרומי",
+    nameHe: "חצי-קרומי (המסטרינג מדיאלי)",
     nameEn: "Semimembranosus",
     region: "thigh",
     originHe: "ischial tuberosity",

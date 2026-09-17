@@ -15,6 +15,8 @@ import { muscles } from "@/data/muscles";
 import { AnatomyThumb } from "@/components/anatomy-image";
 import { NamePair, bilingual } from "@/components/name-pair";
 import { MuscleHookBox } from "@/components/oi-mnemonics";
+import { BiarticularWhyList, MuscleBiarticularBox } from "@/components/biarticular-view";
+import { FamilyBadge } from "@/components/muscle-table";
 import { cn } from "@/lib/utils";
 
 export function WhyView({
@@ -77,6 +79,8 @@ export function WhyView({
       </section>
 
       <SideTable />
+
+      <BiarticularWhyList region={region} />
 
       {logic ? (
         <RegionLogicCard logic={logic} />
@@ -284,6 +288,9 @@ function MuscleWhyPanel({ muscleId }: { muscleId: string }) {
         <AnatomyThumb kind="muscles" id={muscle.id} alt={muscle.nameHe} size="md" />
         <div>
           <NamePair en={muscle.nameEn} he={muscle.nameHe} enClassName="text-xl" heClassName="text-sm" />
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            <FamilyBadge muscleId={muscle.id} />
+          </div>
           <p className="mt-1 text-xs text-[var(--ink-soft)]">{muscle.actionHe}</p>
         </div>
       </div>
@@ -297,6 +304,9 @@ function MuscleWhyPanel({ muscleId }: { muscleId: string }) {
       </div>
       <div className="mt-4">
         <MuscleHookBox muscleId={muscle.id} />
+      </div>
+      <div className="mt-4">
+        <MuscleBiarticularBox muscleId={muscle.id} />
       </div>
       <div className="mt-4 grid gap-3 text-xs md:grid-cols-2">
         <div>

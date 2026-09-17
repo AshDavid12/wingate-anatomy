@@ -30,8 +30,19 @@ export function musclesByPlane(plane: PlaneId): Muscle[] {
   );
 }
 
+export function familiesOf(muscleId: string) {
+  return FAMILIES.filter((f) => f.members.includes(muscleId));
+}
+
 export function familyOf(muscleId: string) {
-  return FAMILIES.find((f) => f.members.includes(muscleId));
+  return familiesOf(muscleId)[0];
+}
+
+/** Group labels shown on muscle names — exam families students must recognize. */
+export const NAMED_FAMILIES = new Set(["quads", "hamstrings"]);
+
+export function namedFamiliesOf(muscleId: string) {
+  return familiesOf(muscleId).filter((f) => NAMED_FAMILIES.has(f.id));
 }
 
 export type SimilarHit = {

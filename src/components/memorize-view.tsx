@@ -14,6 +14,7 @@ import { AnatomyThumb } from "@/components/anatomy-image";
 import { EmptyState } from "@/components/muscle-table";
 import { ActionGroupsView } from "@/components/action-groups";
 import { MusclePartsView } from "@/components/muscle-parts";
+import { BiarticularView } from "@/components/biarticular-view";
 import { bilingual, NamePair } from "@/components/name-pair";
 import { cn } from "@/lib/utils";
 
@@ -61,7 +62,7 @@ export function MemorizeView({
   region: RegionId | "all";
   query: string;
 }) {
-  const [page, setPage] = useState<"heads" | "movements" | "attachments">("heads");
+  const [page, setPage] = useState<"heads" | "movements" | "attachments" | "biarticular">("heads");
 
   return (
     <div className="space-y-6">
@@ -102,11 +103,25 @@ export function MemorizeView({
         >
           Origin / Insertion · אחיזות
         </button>
+        <button
+          type="button"
+          onClick={() => setPage("biarticular")}
+          className={cn(
+            "rounded-full border px-3 py-1.5 text-sm font-medium transition",
+            page === "biarticular"
+              ? "border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]"
+              : "border-[var(--line)] bg-[var(--card)] text-[var(--ink-soft)] hover:border-[var(--ink)]",
+          )}
+        >
+          Biarticular · דו-מפרקיים
+        </button>
       </div>
       {page === "heads" ? (
         <MusclePartsView region={region} query={query} />
       ) : page === "movements" ? (
         <ActionGroupsView region={region} query={query} />
+      ) : page === "biarticular" ? (
+        <BiarticularView region={region} query={query} />
       ) : (
         <AttachmentTips region={region} query={query} />
       )}

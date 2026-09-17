@@ -1042,6 +1042,20 @@ export const dictionaryTerms: DictionaryTerm[] = [
     definition: "שני שרירים אגוניסטים הפועלים בכיוונים מנוגדים ויוצרים תנועה סיבובית משותפת",
   },
   {
+    id: "d172",
+    topic: "תפקידי השריר",
+    he: "שריר חד-מפרקי",
+    en: "Monoarticular muscle",
+    definition: "שריר שחוצה מפרק אחד בלבד ולכן מזיז רק אותו. דוגמאות: brachialis (מרפק), vastus lateralis (ברך), soleus (קרסול)",
+  },
+  {
+    id: "d173",
+    topic: "תפקידי השריר",
+    he: "שריר דו-מפרקי",
+    en: "Biarticular muscle",
+    definition: "שריר שחוצה שני מפרקים ויכול להזיז את שניהם. דוגמאות: biceps brachii (כתף+מרפק), rectus femoris (ירך+ברך), gastrocnemius (ברך+קרסול). הראש הארוך של triceps ושל biceps femoris דו-מפרקי; הראשים הקצרים לא",
+  },
+  {
     id: "d133",
     topic: "גף תחתון",
     he: "מפרק ירך",

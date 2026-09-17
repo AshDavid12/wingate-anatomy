@@ -5,7 +5,7 @@ import type { Muscle } from "@/data/types";
 import { REGIONS, REGION_COLORS } from "@/data/regions";
 import { AnatomyLightbox, AnatomyThumb } from "@/components/anatomy-image";
 import { anatomyImage } from "@/data/anatomy-images";
-import { similarMuscles } from "@/data/cross";
+import { namedFamiliesOf, similarMuscles } from "@/data/cross";
 import { MUSCLE_TAGS } from "@/data/muscle-tags";
 import { actionById } from "@/data/planes";
 import { PlaneBadge } from "@/components/planes-view";
@@ -14,6 +14,7 @@ import { bilingual, NamePair } from "@/components/name-pair";
 import { MuscleWhyBox } from "@/components/why-view";
 import { MuscleHookBox, MuscleHookChips } from "@/components/oi-mnemonics";
 import { MusclePartsBox } from "@/components/muscle-parts";
+import { BiarticularBadge, MuscleBiarticularBox } from "@/components/biarticular-view";
 import { cn } from "@/lib/utils";
 
 type Hidden = { o: boolean; i: boolean; a: boolean };
@@ -151,7 +152,14 @@ export function MuscleTable({
           title={open.nameEn}
           subtitle={open.nameHe}
         >
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            <FamilyBadge muscleId={open.id} />
+            <BiarticularBadge muscleId={open.id} />
+          </div>
           <RelatedMuscles muscleId={open.id} />
+          <div className="mt-4">
+            <MuscleBiarticularBox muscleId={open.id} />
+          </div>
           <div className="mt-4">
             <MusclePartsBox muscleId={open.id} />
           </div>
@@ -199,6 +207,8 @@ function MuscleName({ m }: { m: Muscle }) {
             Extra · הרחבה
           </span>
         )}
+        <BiarticularBadge muscleId={m.id} />
+        <FamilyBadge muscleId={m.id} />
       </div>
       <p className="text-xs text-[var(--ink-soft)]">{m.nameHe}</p>
       <div className="mt-1 flex flex-wrap gap-1">
@@ -232,6 +242,23 @@ function MuscleName({ m }: { m: Muscle }) {
       </div>
       <MuscleHookChips muscleId={m.id} />
     </div>
+  );
+}
+
+export function FamilyBadge({ muscleId }: { muscleId: string }) {
+  const families = namedFamiliesOf(muscleId);
+  if (families.length === 0) return null;
+  return (
+    <>
+      {families.map((family) => (
+        <span
+          key={family.id}
+          className="rounded-full border border-[var(--accent)]/40 bg-[var(--paper-2)] px-2 py-0.5 text-[10px] font-medium text-[var(--accent)]"
+        >
+          {family.en} · {family.he}
+        </span>
+      ))}
+    </>
   );
 }
 

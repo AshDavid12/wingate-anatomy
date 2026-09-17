@@ -5,7 +5,7 @@ import type { Muscle } from "@/data/types";
 import { DICTIONARY_TOPICS, dictionaryTerms, searchDictionary, topicLabel } from "@/data/dictionary";
 import { LANDMARK_REGIONS, examLandmarks, searchLandmarks, type LandmarkRegionId } from "@/data/landmarks";
 import { anatomyImage } from "@/data/anatomy-images";
-import { EmptyState } from "@/components/muscle-table";
+import { EmptyState, FamilyBadge } from "@/components/muscle-table";
 import { AnatomyThumb } from "@/components/anatomy-image";
 import { NamePair } from "@/components/name-pair";
 import { whyById } from "@/data/why-moves";
@@ -93,6 +93,9 @@ function MuscleCards({ muscles }: { muscles: Muscle[] }) {
             />
             <h2 className="term mt-3 text-3xl font-bold">{m.nameEn}</h2>
             <p className="mt-2 text-lg opacity-70">{m.nameHe}</p>
+            <div className="mt-2 flex justify-center">
+              <FamilyBadge muscleId={m.id} />
+            </div>
             <p className="mt-6 text-sm opacity-60">Tap to reveal Origin · Insertion · Action · לחצו לחשיפה</p>
           </div>
         ) : (
@@ -114,6 +117,9 @@ function MuscleCards({ muscles }: { muscles: Muscle[] }) {
                   enClassName="text-xl"
                   heClassName="text-base opacity-70"
                 />
+                <span className="mt-1 flex flex-wrap gap-1">
+                  <FamilyBadge muscleId={m.id} />
+                </span>
               </h2>
             </div>
             <Block label="Origin" he={m.originHe} en={m.originEn} />

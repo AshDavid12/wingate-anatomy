@@ -18,6 +18,7 @@ import {
 import { musclesForBone } from "@/data/lookups";
 import { AnatomyThumb } from "@/components/anatomy-image";
 import { PlaneBadge } from "@/components/planes-view";
+import { FamilyBadge } from "@/components/muscle-table";
 import { bilingual, NamePair } from "@/components/name-pair";
 import { cn } from "@/lib/utils";
 import type { Muscle } from "@/data/types";
@@ -195,6 +196,9 @@ function MuscleRow({ m, extra }: { m: Muscle; extra?: string }) {
       <AnatomyThumb kind="muscles" id={m.id} alt={m.nameHe} size="sm" interactive={false} />
       <div className="min-w-0 flex-1">
         <NamePair en={m.nameEn} he={m.nameHe} heClassName="text-xs" />
+        <div className="mt-1 flex flex-wrap gap-1">
+          <FamilyBadge muscleId={m.id} />
+        </div>
         {extra && <p className="mt-1 text-xs text-[var(--accent)]">{extra}</p>}
         <p className="mt-1 line-clamp-2 text-xs text-[var(--ink-soft)]">
           {m.actionEn} · {m.actionHe}

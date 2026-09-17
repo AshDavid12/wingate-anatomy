@@ -2,12 +2,14 @@
 
 import { useMemo, useState } from "react";
 import {
+  ACTION_GROUPS,
   actionGroupsForRegion,
   searchActionGroups,
   type ActionGroup,
   type ActionMember,
 } from "@/data/action-groups";
 import { REGIONS, REGION_COLORS, type RegionId } from "@/data/regions";
+import { ActionGroupDrill } from "@/components/action-group-drill";
 import { EmptyState } from "@/components/muscle-table";
 import { bilingual } from "@/components/name-pair";
 import { cn } from "@/lib/utils";
@@ -77,10 +79,18 @@ export function ActionGroupsView({
           />
           Accessory · משנה
         </label>
+        <a
+          href="#movement-practice"
+          className="rounded-full border border-[var(--ink)] px-2.5 py-1 text-xs font-medium text-[var(--ink)] hover:bg-[var(--ink)] hover:text-[var(--paper)]"
+        >
+          Practice · תרגול ↓
+        </a>
         <span className="ms-auto text-xs text-[var(--ink-soft)]">
           {groups.length} groups · קבוצות
         </span>
       </div>
+
+      {groups.length > 0 && <ActionGroupDrill pool={groups} universe={ACTION_GROUPS} />}
 
       {groups.length === 0 ? (
         <EmptyState

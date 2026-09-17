@@ -7,6 +7,7 @@ import { joints } from "@/data/joints";
 import { anatomyImage, type AnatomyKind } from "@/data/anatomy-images";
 import { AnatomyLightbox, AnatomyThumb } from "@/components/anatomy-image";
 import { REGIONS, REGION_COLORS } from "@/data/regions";
+import { namedFamiliesOf } from "@/data/cross";
 import { cn } from "@/lib/utils";
 
 type Kind = Exclude<AnatomyKind, "regions">;
@@ -22,6 +23,7 @@ type AtlasItem = {
   he: string;
   en: string;
   badge?: string;
+  family?: string;
   color?: string;
 };
 
@@ -37,7 +39,7 @@ export function Atlas({ query }: { query: string }) {
         .filter(
           (m) =>
             !q ||
-            [m.nameHe, m.nameEn, m.actionHe].join(" ").toLowerCase().includes(q),
+            [m.nameHe, m.nameEn, m.actionHe, ...namedFamiliesOf(m.id).flatMap((f) => [f.en, f.he])].join(" ").toLowerCase().includes(q),
         )
         .map((m) => ({
           id: m.id,
@@ -46,6 +48,10 @@ export function Atlas({ query }: { query: string }) {
           badge: (() => {
             const r = REGIONS.find((x) => x.id === m.region);
             return r ? `${r.en} · ${r.he}` : undefined;
+          })(),
+          family: (() => {
+            const f = namedFamiliesOf(m.id)[0];
+            return f ? `${f.en} · ${f.he}` : undefined;
           })(),
           color: REGION_COLORS[m.region],
         }));
@@ -117,6 +123,11 @@ export function Atlas({ query }: { query: string }) {
                   )}
                 >
                   {item.badge}
+                </span>
+              )}
+              {item.family && (
+                <span className="mt-1 ms-1 inline-block rounded-full border border-[var(--accent)]/40 bg-[var(--paper-2)] px-2 py-0.5 text-[10px] font-medium text-[var(--accent)]">
+                  {item.family}
                 </span>
               )}
             </div>

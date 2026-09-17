@@ -5,6 +5,8 @@ import { MUSCLE_TAGS, JOINT_TAGS } from "./muscle-tags";
 import { actionById } from "./planes";
 import { whyById } from "./why-moves";
 import { hooksForMuscle, hookSearchBlob } from "./oi-mnemonics";
+import { isBiarticular } from "./biarticular";
+import { familiesOf } from "./cross";
 import type { Bone, Muscle } from "./types";
 
 export function musclesForBone(boneId: string): {
@@ -42,6 +44,8 @@ export function searchMuscles(query: string, list: Muscle[] = muscles): Muscle[]
       ...hooksForMuscle(m.id).map(hookSearchBlob),
       ...(MUSCLE_TAGS[m.id]?.actions.map((a) => `${actionById(a)?.he ?? ""} ${actionById(a)?.en ?? ""}`) ?? []),
       ...(MUSCLE_TAGS[m.id]?.joints.map((j) => JOINT_TAGS.find((x) => x.id === j)?.he ?? j) ?? []),
+      ...(isBiarticular(m.id) ? ["biarticular", "דו-מפרקי", "דו מפרקי"] : []),
+      ...familiesOf(m.id).flatMap((f) => [f.id, f.en, f.he]),
     ]
       .join(" ")
       .toLowerCase()
