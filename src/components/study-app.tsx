@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { BookOpen, Bone, Dumbbell, GraduationCap, Hash, Images, Layers, Lightbulb, Move3d, ScanSearch, Search, Sparkles, Waypoints } from "lucide-react";
 import { muscles } from "@/data/muscles";
 import { dictionaryTerms } from "@/data/dictionary";
@@ -79,7 +80,11 @@ export function StudyApp() {
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="text-[11px] font-semibold tracking-[0.22em] text-[var(--accent)] uppercase">
-                Wingate · Anatomy exam
+                <Link href="/" className="hover:underline">
+                  Wingate
+                </Link>
+                {" · "}
+                Anatomy exam
               </p>
               <h1 className="mt-1 text-2xl font-bold leading-tight md:text-3xl">
                 Anatomy for the exam · אנטומיה למבחן
@@ -95,6 +100,12 @@ export function StudyApp() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--ink-soft)]">
+              <Link
+                href="/"
+                className="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1 font-medium text-[var(--ink)] hover:border-[var(--ink)]"
+              >
+                כל המקצועות
+              </Link>
               <span className="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1">
                 {muscles.length} muscles · שרירים
               </span>

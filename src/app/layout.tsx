@@ -9,9 +9,9 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  title: "Anatomy for the exam · אנטומיה למבחן · Origin · Insertion · Action",
+  title: "Anatomy and physiology · אנטומיה ופיזיולוגיה למבחן",
   description:
-    "Muscle and bone tables with Origin, Insertion, and Action — a Wingate anatomy exam study tool. טבלאות שרירים ועצמות עם Origin, Insertion ותנועה.",
+    "Wingate exam study: muscle Origin, Insertion, and Action, plus exercise physiology — energy pathways, VO2max, and recovery. אנטומיה ופיזיולוגיה של תפקוד האדם.",
 };
 
 export default function RootLayout({
