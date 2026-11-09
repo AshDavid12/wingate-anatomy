@@ -7,6 +7,7 @@ import {
   BookOpen,
   Droplets,
   GraduationCap,
+  Hash,
   Search,
   Sparkles,
   Wind,
@@ -16,10 +17,12 @@ import { PHYSIO_CARDS, searchCards, topicLabel } from "@/data/physiology";
 import { PATHWAY_ROWS, PATHWAY_TRAITS } from "@/data/physiology/pathways";
 import { PHYSIO_QUESTIONS } from "@/data/physiology/questions";
 import { PHYSIO_TOPICS, type PhysioCard, type PhysioTopicId } from "@/data/physiology/types";
+import { NumbersView } from "@/components/numbers-view";
 import { PhysiologyQuiz } from "@/components/physiology-quiz";
+import { USEFUL_NUMBERS } from "@/data/physiology/numbers";
 import { cn } from "@/lib/utils";
 
-type Tab = PhysioTopicId | "cards" | "quiz";
+type Tab = PhysioTopicId | "numbers" | "cards" | "quiz";
 
 const TABS: { id: Tab; en: string; he: string; icon: typeof Activity }[] = [
   { id: "concepts", en: "Concepts", he: "מושגים", icon: BookOpen },
@@ -27,6 +30,7 @@ const TABS: { id: Tab; en: string; he: string; icon: typeof Activity }[] = [
   { id: "foundations", en: "Foundations", he: "יסודות", icon: Activity },
   { id: "pathways", en: "Pathways", he: "מסלולים", icon: Zap },
   { id: "oxygen", en: "Oxygen", he: "חמצן והתאוששות", icon: Wind },
+  { id: "numbers", en: "Numbers", he: "מספרים", icon: Hash },
   { id: "cards", en: "Cards", he: "כרטיסיות", icon: Sparkles },
   { id: "quiz", en: "Quiz", he: "חידון", icon: GraduationCap },
 ];
@@ -39,7 +43,7 @@ export function PhysiologyApp() {
 
   const cards = useMemo(() => {
     if (tab === "cards") return searchCards(query, cardTopic);
-    if (tab === "quiz") return [];
+    if (tab === "quiz" || tab === "numbers") return [];
     return searchCards(query, tab);
   }, [tab, query, cardTopic]);
 
@@ -77,6 +81,9 @@ export function PhysiologyApp() {
               <span className="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1">
                 {PHYSIO_QUESTIONS.length} questions · שאלות
               </span>
+              <span className="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1">
+                {USEFUL_NUMBERS.length} numbers · מספרים לשינון
+              </span>
             </div>
           </div>
 
@@ -113,7 +120,11 @@ export function PhysiologyApp() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="חיפוש: ATP, סף, גליקוגן, PFK, הומאוסטזיס…"
+              placeholder={
+                tab === "numbers"
+                  ? "חיפוש מספר: 9 קק״ל, 10 שניות, סף, גליקוגן, 4 ממול…"
+                  : "חיפוש: ATP, סף, גליקוגן, PFK, הומאוסטזיס…"
+              }
               className="w-full rounded-xl border border-[var(--line)] bg-[var(--card)] py-2.5 pr-10 pl-3 text-sm outline-none ring-[var(--accent-2)] focus:ring-2"
             />
           </div>
@@ -147,6 +158,8 @@ export function PhysiologyApp() {
         {tab === "pathways" && <PathwayTables />}
         {tab === "quiz" ? (
           <PhysiologyQuiz query={query} />
+        ) : tab === "numbers" ? (
+          <NumbersView query={query} hide={hide} />
         ) : tab === "cards" ? (
           <CardDeck cards={cards} />
         ) : (

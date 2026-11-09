@@ -9,9 +9,9 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  title: "Anatomy and physiology · אנטומיה ופיזיולוגיה למבחן",
+  title: "Wingate exam study · אנטומיה, פיזיולוגיה ותרגילים",
   description:
-    "Wingate exam study: muscle Origin, Insertion, and Action, plus exercise physiology — energy pathways, VO2max, and recovery. אנטומיה ופיזיולוגיה של תפקוד האדם.",
+    "Wingate exam study: anatomy, exercise physiology, and the practical exercise booklet. אנטומיה, פיזיולוגיה ותרגילי חדר כושר.",
 };
 
 export default function RootLayout({
