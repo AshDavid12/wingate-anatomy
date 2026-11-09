@@ -2,7 +2,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ClipboardList, ListChecks, Search, Waypoints } from "lucide-react";
+import { Bone, ClipboardList, GraduationCap, ListChecks, Search, Waypoints } from "lucide-react";
+import { ExercisesJoints } from "@/components/exercises-joints";
+import { ExercisesQuiz } from "@/components/exercises-quiz";
+import { EXERCISE_QUESTIONS } from "@/data/exercises/quiz";
 import {
   DRILLS,
   EXERCISES,
@@ -22,13 +25,15 @@ import {
 } from "@/data/exercises/content";
 import { cn } from "@/lib/utils";
 
-type Tab = "map" | "pick" | "rules";
+type Tab = "map" | "pick" | "rules" | "joints" | "quiz";
 type AskRole = "strengthen" | Role;
 
 const TABS: { id: Tab; en: string; he: string; icon: typeof ClipboardList }[] = [
   { id: "map", en: "Map", he: "מפה", icon: Waypoints },
   { id: "pick", en: "Pick", he: "בחירה", icon: ListChecks },
   { id: "rules", en: "Rules", he: "כללים", icon: ClipboardList },
+  { id: "joints", en: "Joints", he: "מפרקים", icon: Bone },
+  { id: "quiz", en: "Quiz", he: "חידון", icon: GraduationCap },
 ];
 
 export function ExercisesApp() {
@@ -116,6 +121,9 @@ export function ExercisesApp() {
               <span className="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1">
                 {EXERCISES.length} exercises · תרגילים
               </span>
+              <span className="rounded-full border border-[var(--line)] bg-[var(--paper)] px-3 py-1">
+                {EXERCISE_QUESTIONS.length} questions · שאלות
+              </span>
             </div>
           </div>
 
@@ -153,7 +161,13 @@ export function ExercisesApp() {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="חיפוש: סקוואט, לט, פולי, חזה עליון, אי ספיקה…"
+                placeholder={
+                  tab === "quiz"
+                    ? "חיפוש בשאלות: אי ספיקה, סקוואט, מנוף…"
+                    : tab === "joints"
+                      ? "חיפוש: מפרק, טעות, סקוואט, לט…"
+                      : "חיפוש: סקוואט, לט, פולי, חזה עליון, אי ספיקה…"
+                }
                 className="w-full rounded-xl border border-[var(--line)] bg-[var(--card)] py-2.5 pr-10 pl-3 text-sm outline-none ring-[var(--accent)] focus:ring-2"
               />
             </div>
@@ -342,6 +356,10 @@ export function ExercisesApp() {
           </div>
         )}
 
+        {tab === "joints" && <ExercisesJoints query={query} />}
+
+        {tab === "quiz" && <ExercisesQuiz query={query} />}
+
         {tab === "rules" && (
           <div className="space-y-4">
             <p className="max-w-3xl text-sm text-[var(--ink-soft)]">
@@ -368,14 +386,21 @@ export function ExercisesApp() {
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {RULES.filter((rule) => ruleGroup === "all" || rule.group === ruleGroup).map((rule) => (
-                <article key={rule.id} className="rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4">
+                <article
+                  key={rule.id}
+                  className={cn(
+                    "rounded-2xl border border-[var(--line)] bg-[var(--card)] p-4",
+                    rule.figure && "md:col-span-2",
+                  )}
+                >
                   <p className="text-[11px] font-semibold text-[var(--accent)]">
                     {RULE_GROUPS.find((group) => group.id === rule.group)?.he}
                   </p>
                   <h2 className="mt-1 text-base font-bold">{rule.title}</h2>
-                  <p className={cn("mt-2 text-sm leading-relaxed", hide && "hide-study")}>
-                    {pinNumbers(rule.body)}
-                  </p>
+                  <div className={cn(hide && "hide-study")}>
+                    {rule.figure === "tension" && <TensionChart />}
+                    <p className="mt-2 text-sm leading-relaxed">{pinNumbers(rule.body)}</p>
+                  </div>
                 </article>
               ))}
             </div>
@@ -414,6 +439,52 @@ function ExerciseCard({ exercise, note }: { exercise: Exercise; note?: string })
       </p>
       <p className="mt-1.5 text-sm leading-relaxed">{pinNumbers(note ?? exercise.hook)}</p>
     </article>
+  );
+}
+
+function TensionChart() {
+  return (
+    <div className="mt-3" dir="ltr">
+      <svg viewBox="0 0 360 168" className="h-44 w-full max-w-xl" role="img" aria-label="Length tension curve">
+        <line x1="36" y1="132" x2="336" y2="132" stroke="currentColor" strokeOpacity="0.25" />
+        <line x1="36" y1="16" x2="36" y2="132" stroke="currentColor" strokeOpacity="0.25" />
+        <text x="186" y="156" textAnchor="middle" className="fill-current text-[11px]" opacity="0.7">
+          Length, % of resting length
+        </text>
+        <text x="14" y="78" textAnchor="middle" className="fill-current text-[11px]" opacity="0.7" transform="rotate(-90 14 78)">
+          Tension
+        </text>
+        {[
+          [86, "50"],
+          [186, "100"],
+          [286, "150"],
+        ].map(([x, label]) => (
+          <g key={label}>
+            <line x1={x} y1="132" x2={x} y2="136" stroke="currentColor" strokeOpacity="0.4" />
+            <text x={x} y="148" textAnchor="middle" className="fill-current text-[11px]">
+              {label}
+            </text>
+          </g>
+        ))}
+        <path d="M86 118 C126 118 150 28 186 26 C222 24 250 100 286 108" fill="none" stroke="var(--accent)" strokeWidth="2.5" />
+        <path d="M86 126 C150 126 210 120 240 78 C262 48 276 28 286 18" fill="none" stroke="var(--accent-2)" strokeWidth="2.5" />
+        <path d="M86 112 C130 112 156 22 186 20 C230 18 250 16 286 12" fill="none" stroke="currentColor" strokeWidth="2.5" />
+      </svg>
+      <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+        <li className="flex items-center gap-1.5">
+          <span className="inline-block h-0.5 w-5 bg-[var(--accent)]" />
+          מתח אקטיבי · Active
+        </li>
+        <li className="flex items-center gap-1.5">
+          <span className="inline-block h-0.5 w-5 bg-[var(--accent-2)]" />
+          מתח פסיבי · Passive
+        </li>
+        <li className="flex items-center gap-1.5">
+          <span className="inline-block h-0.5 w-5 bg-[var(--ink)]" />
+          מתח כולל · Total
+        </li>
+      </ul>
+    </div>
   );
 }
 
